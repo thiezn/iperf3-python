@@ -44,12 +44,19 @@ class IPerf3:
 
         # The test C struct iperf_test
         self._test = self._new()
-        self.lib.iperf_defaults(self._test)  # Apply defaults?
+        self.defaults()
 
         # Generic test settings
         self.role = role
         self.json_output = json_output
         self.verbose = verbose
+
+        # Internal variables
+        self._bulksize = None
+        self._server_hostname = None
+        self._server_port = None
+        self._num_streams = None
+        self._zerocopy = False
 
     def __del__(self):
         """Cleanup the test after the IPerf3 class is terminated"""
@@ -63,11 +70,11 @@ class IPerf3:
         return self.lib.iperf_new_test()
 
     def defaults(self):
-        """Set iperf defaults
+        """(Re)set iperf test defaults
 
         int iperf_defaults(struct iperf_test *t);
         """
-        pass
+        self.lib.iperf_defaults(self._test)
 
     # TODO use the iperf getter functions to retrieve
     # the actual configured data and sync it up with the
@@ -140,7 +147,7 @@ class IPerf3:
         void iperf_set_test_server_port( struct iperf_test *t, int server_port );
         """
         self.lib.iperf_set_test_server_port(self._test, int(port))
-        self._port = port
+        self._server_port = port
 
     @property
     def duration(self):
@@ -222,11 +229,15 @@ class IPerf3:
     @property
     def zerocopy(self):
         """Get the zerocopy value"""
+
+        # TODO This is not working as expected, perhaps need
+        # to ensure the return is indeed 1
+        """
         if self.lib.iperf_has_zerocopy() == 1:
             self._zerocopy = True
         else:
             self._zerocopy = False
-
+        """
         return self._zerocopy
 
     @zerocopy.setter
