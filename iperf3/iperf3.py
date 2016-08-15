@@ -29,16 +29,11 @@ class IPerf3(object):
                  role='s',
                  json_output=True,
                  verbose=True,
-                 iperf_version='3.0.6',
                  lib_name='libiperf.so.0'):
         """Initialise the iperf shared library
 
         :param library: The libiperf library providing the API to iperf3
         """
-        # TODO see if we can determine the iperf3 version. for instance
-        # iperf3.1 supports output to file and iperf_test_output_json_string
-        self.iperf_version = iperf_version
-
         # TODO use find_library to find the best library
         self.lib = cdll.LoadLibrary(lib_name)
 
@@ -76,16 +71,13 @@ class IPerf3(object):
         """
         self.lib.iperf_defaults(self._test)
 
-    # TODO use the iperf getter functions to retrieve
-    # the actual configured data and sync it up with the
-    # python variables
-
     @property
     def role(self):
         """Get the role
 
         :return s (for server) or c (for client)
         """
+        self._role = c_char(self.lib.iperf_get_test_role(self._test))
         return self._role
 
     @role.setter
@@ -106,6 +98,12 @@ class IPerf3(object):
     @property
     def bind_address(self):
         """Get the bind address"""
+        result = c_char_p(self.lib.iperf_get_test_bind_address(self._test)).value
+        if result:
+            self._bind_address = result.decode('utf-8')
+        else:
+            self._bind_address = None
+
         return self._bind_address
 
     @bind_address.setter
@@ -123,6 +121,11 @@ class IPerf3(object):
     @property
     def server_hostname(self):
         """Get the server hostname"""
+        result = c_char_p(self.lib.iperf_get_test_server_hostname(self._test)).value
+        if result:
+            self._server_hostname = result.decode('utf-8')
+        else:
+            self._server_hostname = None
         return self._server_hostname
 
     @server_hostname.setter
@@ -138,6 +141,7 @@ class IPerf3(object):
     @property
     def server_port(self):
         """Get the server port"""
+        self._server_port = self.lib.iperf_get_test_server_port(self._test)
         return self._server_port
 
     @server_port.setter
@@ -152,6 +156,7 @@ class IPerf3(object):
     @property
     def duration(self):
         """Get the test duration"""
+        self._duration = self.lib.iperf_get_test_duration(self._test)
         return self._duration
 
     @duration.setter
@@ -166,6 +171,7 @@ class IPerf3(object):
     @property
     def bulksize(self):
         """Get the test bulksize"""
+        self._bulksize = self.lib.iperf_get_test_blksize(self._test)
         return self._bulksize
 
     @bulksize.setter
@@ -180,6 +186,7 @@ class IPerf3(object):
     @property
     def num_streams(self):
         """Get the number of streams"""
+        self._num_streams = self.lib.iperf_get_test_num_streams(self._test)
         return self._num_streams
 
     @num_streams.setter
@@ -194,6 +201,13 @@ class IPerf3(object):
     @property
     def json_output(self):
         """Toggle json output"""
+        enabled = self.lib.iperf_get_test_json_output(self._test)
+
+        if enabled:
+            self._json_output = True
+        else:
+            self._json_output = False
+
         return self._json_output
 
     @json_output.setter
@@ -212,6 +226,13 @@ class IPerf3(object):
     @property
     def verbose(self):
         """Toggle verbose output"""
+        enabled = self.lib.iperf_get_verbose(self._test)
+
+        if enabled:
+            self._verbose = True
+        else:
+            self._verbose = False
+
         return self._verbose
 
     @verbose.setter
@@ -260,6 +281,12 @@ class IPerf3(object):
     def _errno(self):
         """Returns the last error ID"""
         return c_int.in_dll(self.lib, "i_errno").value
+
+    @property
+    def iperf_version(self):
+        # TODO: need to extract this from libiperf somehow
+        # return c_int.in_dll(self.lib, "client_version").value
+        return 'dontknow'
 
     def _error_to_string(self, error_id):
         """Returns an error string if available"""

@@ -89,9 +89,3 @@ class TestPyPerf:
     def test_error_to_string(self):
         client = IPerf3(role='c')
         assert client._error_to_string(1) == b'cannot be both server and client'
-
-    def test_run_client_no_server(self):
-        """Ensure client fails properly when server is not running"""
-        client = IPerf3(role='c')
-        client.run()
-        assert client._errno == 103  # b'unable to connect to server: '
