@@ -8,8 +8,6 @@ def main():
     client.duration = 1
     client.server_hostname = '127.0.0.1'
     client.server_port = 5201
-    print(client.server_port)
-    client.verbose = True
     client.run()
 
 

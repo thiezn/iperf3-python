@@ -77,7 +77,7 @@ class IPerf3(object):
 
         :return s (for server) or c (for client)
         """
-        self._role = c_char(self.lib.iperf_get_test_role(self._test))
+        self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
         return self._role
 
     @role.setter
@@ -313,17 +313,13 @@ class IPerf3(object):
             else:
                 # redirect stdout back to normal and parse received data
                 os.dup2(stdout, 1)
-                data = json.loads(read_pipe(pipe_out))
-                print(data)
+                return json.loads(read_pipe(pipe_out))
 
         elif self.role == 's':
-            while True:
-                self.lib.iperf_run_server(self._test)
+            self.lib.iperf_run_server(self._test)
 
-                # redirect stdout back to normal and parse received data
-                os.dup2(stdout, 1)
-                data = json.loads(read_pipe(pipe_out))
-                print(data)
-                os.dup2(pipe_in, 1)
-
-                self.lib.iperf_reset_test(self._test)
+            # redirect stdout back to normal and parse received data
+            os.dup2(stdout, 1)
+            data = json.loads(read_pipe(pipe_out))
+            self.lib.iperf_reset_test(self._test)
+            return data
