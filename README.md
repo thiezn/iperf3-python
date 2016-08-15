@@ -35,8 +35,8 @@ client.run()
 
 ## External Dependencies
 
-iperf3
-libiperf.0  (should come with iperf3)
+- iperf3
+- libiperf.0  (should come with iperf3)
 
 ## Testing
 Tested against Ubuntu 14.04 LTS standard iperf3 installation

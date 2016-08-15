@@ -24,7 +24,7 @@ def read_pipe(pipe_out):
     return out.decode('utf-8')
 
 
-class IPerf3:
+class IPerf3(object):
     def __init__(self,
                  role='s',
                  json_output=True,
@@ -96,9 +96,9 @@ class IPerf3:
 
         void iperf_set_test_role( struct iperf_test *pt, char role );
         """
-        if role.lower() in ('c', 's'):
+        if role.lower() in ['c', 's']:
             self.lib.iperf_set_test_role(self._test,
-                                         c_char(bytes(role.lower(), 'utf-8')))
+                                         c_char(role.lower().encode('utf-8')))
             self._role = role
         else:
             raise ValueError("Unknown role, accepted values are 'c' and 's'")
@@ -117,7 +117,7 @@ class IPerf3:
         void iperf_set_test_bind_address( struct iperf_test *t, char *bind_address );
         """
         self.lib.iperf_set_test_bind_address(self._test,
-                                             c_char_p(bytes(address, 'utf-8')))
+                                             c_char_p(address.encode('utf-8')))
         self._bind_address = address
 
     @property
@@ -132,7 +132,7 @@ class IPerf3:
         void iperf_set_test_server_hostname( struct iperf_test *t, char *server_host );
         """
         self.lib.iperf_set_test_server_hostname(self._test,
-                                                c_char_p(bytes(hostname, 'utf-8')))
+                                                c_char_p(hostname.encode('utf-8')))
         self._server_hostname = hostname
 
     @property
