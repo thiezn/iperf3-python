@@ -2,13 +2,14 @@ pyperf - Python interface to iperf3 using the iperf3 introduced API libiperf
 
 url: https://readthedocs
 
-travisCI build status button
+[![Build Status](https://travis-ci.org/thiezn/iperf3-python.svg?branch=master)](https://travis-ci.org/thiezn/iperf3-python)
+[![Coverage Status](https://coveralls.io/repos/github/thiezn/iperf3-python/badge.svg?branch=master)](https://coveralls.io/github/thiezn/iperf3-python?branch=master)
 
 ## Description
 
-pyperf provides a wrapper around the excellent iperf3 library. iperf3 is a complete rewrite of the original iperf implementation. more information at https://bla
+iperf3 for python provides a wrapper around the excellent iperf3 utility. iperf3 is a complete rewrite of the original iperf implementation. more information at [https://iperf.fr/]
 
-iperf3 introduces an API called libiperf that allows you to easily interact with iperf3 from other languages. This library provides a python wrapper around libiperf for easy integration into your own python scripts. 
+iperf3 introduced an API called libiperf that allows you to easily interact with iperf3 from other languages. This library provides a python wrapper around libiperf for easy integration into your own python scripts in a pythonic way
 
 ## Quickstart
 
@@ -30,5 +31,6 @@ client.run()
 
 ## External Dependencies
 
-iperf3 version?? 
+iperf3
 libiperf.0  (should come with iperf3)
+Tested against Ubuntu 14.04 LTS standard iperf3 installation
