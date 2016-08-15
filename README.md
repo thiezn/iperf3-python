@@ -15,15 +15,18 @@ iperf3 introduces an API called libiperf that allows you to easily interact with
   pip install pyperf
 
 ### Server
-  server = PyPerf()
-  server.run()
+```
+server = PyPerf()
+server.run()
+```
 
 ### Client
-  client = PyPerf(role='c')
-  client.verbose = True
-  client.duration = 10
-  client.run()
-
+```
+client = PyPerf(role='c')
+client.verbose = True
+client.duration = 10
+client.run()
+```
 
 ## External Dependencies
 
