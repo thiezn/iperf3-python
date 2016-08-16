@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from iperf3 import IPerf3
+import iperf3
 
 
 def main():
-    server = IPerf3()
+    server = iperf3.Server()
     results = server.run()
     print(results)
 

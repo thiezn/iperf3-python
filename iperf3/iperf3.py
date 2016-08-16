@@ -1,5 +1,10 @@
-"""Wrapper for the iperf3 libiperf.so.0 library
+# -*- coding: utf-8 -*-
 
+"""
+iperf3 for python
+~~~~~~~~~~~~~~~~~
+
+Wrapper for the iperf3 libiperf.so.0 library.
 library explanation and examples using man libiperf
 """
 
@@ -12,11 +17,15 @@ __version__ = '0.1'
 
 
 def more_data(pipe_out):
+    """Check if there is more data left on the pipe"""
     r, _, _ = select.select([pipe_out], [], [], 0)
     return bool(r)
 
 
 def read_pipe(pipe_out):
+    """Read data on a pipe
+
+    Used to capture stdout data produced by libiperf"""
     out = b''
     while more_data(pipe_out):
         out += os.read(pipe_out, 1024)
@@ -25,14 +34,21 @@ def read_pipe(pipe_out):
 
 
 class IPerf3(object):
+    """The base class used by both the iperf3 Server and Client
+
+    .. note:: You should not use this class directly
+    """
     def __init__(self,
-                 role='s',
+                 role,
                  json_output=True,
                  verbose=True,
                  lib_name='libiperf.so.0'):
         """Initialise the iperf shared library
 
-        :param library: The libiperf library providing the API to iperf3
+        :param role: 'c' = client; 's' = server
+        :param json_output: tells libiperf to output json output
+        :param verbose: enable verbose output
+        :param lib_name: The libiperf name providing the API to iperf3
         """
         # TODO use find_library to find the best library
         self.lib = cdll.LoadLibrary(lib_name)
@@ -41,17 +57,13 @@ class IPerf3(object):
         self._test = self._new()
         self.defaults()
 
+        # TODO do we want to allow a user to change the json_output?
+        # if so, we should disable the stdout pipe when json_output=False
+
         # Generic test settings
         self.role = role
         self.json_output = json_output
         self.verbose = verbose
-
-        # Internal variables
-        self._bulksize = None
-        self._server_hostname = None
-        self._server_port = None
-        self._num_streams = None
-        self._zerocopy = False
 
     def __del__(self):
         """Cleanup the test after the IPerf3 class is terminated"""
@@ -65,15 +77,12 @@ class IPerf3(object):
         return self.lib.iperf_new_test()
 
     def defaults(self):
-        """(Re)set iperf test defaults
-
-        int iperf_defaults(struct iperf_test *t);
-        """
+        """Set/reset iperf test defaults."""
         self.lib.iperf_defaults(self._test)
 
     @property
     def role(self):
-        """Get the role
+        """The iperf3 instance role, valid roles are client and server
 
         :return s (for server) or c (for client)
         """
@@ -100,7 +109,7 @@ class IPerf3(object):
 
     @property
     def bind_address(self):
-        """Get the bind address"""
+        """The bind address the iperf3 instance will listen on"""
         result = c_char_p(self.lib.iperf_get_test_bind_address(self._test)).value
         if result:
             self._bind_address = result.decode('utf-8')
@@ -113,13 +122,145 @@ class IPerf3(object):
     def bind_address(self, address):
         """Set the bind address
 
-        :param address: address to bind on, * for any available address
+        :param address: address to bind on, * for all
 
         void iperf_set_test_bind_address( struct iperf_test *t, char *bind_address );
         """
         self.lib.iperf_set_test_bind_address(self._test,
                                              c_char_p(address.encode('utf-8')))
         self._bind_address = address
+
+    @property
+    def port(self):
+        """The port the iperf3 server is listening on"""
+        self._port = self.lib.iperf_get_test_server_port(self._test)
+        return self._port
+
+    @port.setter
+    def port(self, port):
+        """Set the server port
+
+        void iperf_set_test_server_port( struct iperf_test *t, int port );
+        """
+        self.lib.iperf_set_test_server_port(self._test, int(port))
+        self._port = port
+
+    @property
+    def json_output(self):
+        """Toggles json output of libiperf
+
+        Turning this off will output the iperf3 instance results to
+        stdout/stderr"""
+        enabled = self.lib.iperf_get_test_json_output(self._test)
+
+        if enabled:
+            self._json_output = True
+        else:
+            self._json_output = False
+
+        return self._json_output
+
+    @json_output.setter
+    def json_output(self, enabled):
+        """Toggle json output
+
+        :param enabled: True or False
+
+        void iperf_set_test_json_output( struct iperf_test *t, int json_output );
+        """
+        if enabled:
+            self.lib.iperf_set_test_json_output(self._test, 1)
+        else:
+            self.lib.iperf_set_test_json_output(self._test, 0)
+
+        self._json_output = enabled
+
+    @property
+    def verbose(self):
+        """Toggles verbose output for the iperf3 instance"""
+        enabled = self.lib.iperf_get_verbose(self._test)
+
+        if enabled:
+            self._verbose = True
+        else:
+            self._verbose = False
+
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, enabled):
+        """Toggle verbose output
+
+        :param enabled: True or False
+
+        iperf_set_verbose(  struct iperf_test *t, int ? );
+        """
+        if enabled:
+            self.lib.iperf_set_verbose(self._test, 1)
+        else:
+            self.lib.iperf_set_verbose(self._test, 0)
+        self._verbose = enabled
+
+    @property
+    def _errno(self):
+        """Returns the last error ID"""
+        return c_int.in_dll(self.lib, "i_errno").value
+
+    @property
+    def iperf_version(self):
+        """Returns the version of the libiperf library
+
+        .. todo:: NOT IMPLEMENTED AT THE MOMENT
+        """
+        # TODO: need to extract this from libiperf somehow
+        # return c_int.in_dll(self.lib, "client_version").value
+        return 'NOTIMPLEMENTED'
+
+    def _error_to_string(self, error_id):
+        """Returns an error string from libiperf
+
+        :param error_id: The error_id produced by libiperf
+        """
+        strerror = self.lib.iperf_strerror
+        strerror.restype = c_char_p
+        return strerror(error_id).decode('utf-8')
+
+    def run(self):
+        """Runs the iperf3 instance.
+
+        This function has to be instantiated by the Client and Server
+        instances
+        """
+        raise NotImplementedError
+
+
+class Client(IPerf3):
+    """A iperf3 client connection.
+
+    This opens up a connection to a running iperf3 server
+
+    Basic Usage::
+
+      >>> import iperf3
+
+      >>> client = iperf3.Client()
+      >>> client.duration = 1
+      >>> client.server_hostname = '127.0.0.1'
+      >>> client.port = 5201
+      >>> client.run()
+      {'intervals': [{'sum': {...
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initialise the iperf shared library"""
+        super(Client, self).__init__(role='c', *args, **kwargs)
+
+        # Internal variables
+        self._bulksize = None
+        self._server_hostname = None
+        self._port = None
+        self._num_streams = None
+        self._zerocopy = False
 
     @property
     def server_hostname(self):
@@ -135,26 +276,13 @@ class IPerf3(object):
     def server_hostname(self, hostname):
         """Set the server hostname
 
+        :param hostname: The hostname or IP address of the server
+
         void iperf_set_test_server_hostname( struct iperf_test *t, char *server_host );
         """
         self.lib.iperf_set_test_server_hostname(self._test,
                                                 c_char_p(hostname.encode('utf-8')))
         self._server_hostname = hostname
-
-    @property
-    def server_port(self):
-        """Get the server port"""
-        self._server_port = self.lib.iperf_get_test_server_port(self._test)
-        return self._server_port
-
-    @server_port.setter
-    def server_port(self, port):
-        """Set the server port
-
-        void iperf_set_test_server_port( struct iperf_test *t, int server_port );
-        """
-        self.lib.iperf_set_test_server_port(self._test, int(port))
-        self._server_port = port
 
     @property
     def duration(self):
@@ -165,6 +293,8 @@ class IPerf3(object):
     @duration.setter
     def duration(self, duration):
         """Set the test duration
+
+        :param duration: int The duration in seconds
 
         void iperf_set_test_duration( struct iperf_test *t, int duration );
         """
@@ -181,6 +311,8 @@ class IPerf3(object):
     def bulksize(self, bulksize):
         """Set the test bulksize
 
+        :param bulksize: int The bulksize to use
+
         void iperf_set_test_blksize( struct iperf_test *t, int blksize );
         """
         self.lib.iperf_set_test_blksize(self._test, bulksize)
@@ -196,72 +328,24 @@ class IPerf3(object):
     def num_streams(self, number):
         """Set the number of streams
 
+        :param number: int The number of streams to use
+
         void iperf_set_test_num_streams( struct iperf_test *t, int num_streams );
         """
         self.lib.iperf_set_test_num_streams(self._test, number)
         self._num_streams = number
 
     @property
-    def json_output(self):
-        """Toggle json output"""
-        enabled = self.lib.iperf_get_test_json_output(self._test)
-
-        if enabled:
-            self._json_output = True
-        else:
-            self._json_output = False
-
-        return self._json_output
-
-    @json_output.setter
-    def json_output(self, enabled):
-        """Toggle json output
-
-        void iperf_set_test_json_output( struct iperf_test *t, int json_output );
-        """
-        if enabled:
-            self.lib.iperf_set_test_json_output(self._test, 1)
-        else:
-            self.lib.iperf_set_test_json_output(self._test, 0)
-
-        self._json_output = enabled
-
-    @property
-    def verbose(self):
-        """Toggle verbose output"""
-        enabled = self.lib.iperf_get_verbose(self._test)
-
-        if enabled:
-            self._verbose = True
-        else:
-            self._verbose = False
-
-        return self._verbose
-
-    @verbose.setter
-    def verbose(self, enabled):
-        """Toggle verbose output
-
-        iperf_set_verbose(  struct iperf_test *t, int ? );
-        """
-        if enabled:
-            self.lib.iperf_set_verbose(self._test, 1)
-        else:
-            self.lib.iperf_set_verbose(self._test, 0)
-        self._verbose = enabled
-
-    @property
     def zerocopy(self):
-        """Get the zerocopy value"""
+        """Get the zerocopy value
 
-        # TODO This is not working as expected, perhaps need
-        # to ensure the return is indeed 1
+        .. todo:: This is not working as expected, perhaps need
+        to ensure the return is indeed 1
         """
-        if self.lib.iperf_has_zerocopy() == 1:
-            self._zerocopy = True
-        else:
-            self._zerocopy = False
-        """
+        # if self.lib.iperf_has_zerocopy() == 1:
+        #     self._zerocopy = True
+        # else:
+        #     self._zerocopy = False
         return self._zerocopy
 
     @zerocopy.setter
@@ -270,6 +354,8 @@ class IPerf3(object):
 
         Use the sendfile() system call for "Zero Copy" mode. This uses much
         less CPU.
+
+        :param enabled: True or False
 
         void iperf_set_test_zerocopy( struct iperf_test* t, int zerocopy );
         """
@@ -280,27 +366,54 @@ class IPerf3(object):
 
         self._zerocopy = enabled
 
-    @property
-    def _errno(self):
-        """Returns the last error ID"""
-        return c_int.in_dll(self.lib, "i_errno").value
-
-    @property
-    def iperf_version(self):
-        # TODO: need to extract this from libiperf somehow
-        # return c_int.in_dll(self.lib, "client_version").value
-        return 'dontknow'
-
-    def _error_to_string(self, error_id):
-        """Returns an error string if available"""
-        strerror = self.lib.iperf_strerror
-        strerror.restype = c_char_p
-        return strerror(error_id).decode('utf-8')
-
     def run(self):
         """Run the current test client
 
+        .. todo:: At the moment relying on the fact that json_output
+        is enabled. Need to ensure printing to stdout when json_output
+        is not enabled
+
         int iperf_run_client(struct iperf_test *);
+        """
+
+        # Redirect stdout to a pipe to capture the libiperf output
+        pipe_out, pipe_in = os.pipe()
+        stdout = os.dup(1)
+        os.dup2(pipe_in, 1)
+
+        error = self.lib.iperf_run_client(self._test)
+        os.dup2(stdout, 1)
+        if error:
+            return {'error': self._error_to_string(self._errno)}
+        else:
+            return json.loads(read_pipe(pipe_out))
+
+
+class Server(IPerf3):
+    """A iperf3 server connection.
+
+    This starts an iperf3 server session
+
+    Basic Usage::
+
+      >>> import iperf3
+
+      >>> server = iperf3.Server()
+      >>> server.run()
+      {'start': {...
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initialise the iperf3 server instance"""
+        super(Server, self).__init__(role='s', *args, **kwargs)
+
+    def run(self):
+        """Run the current test server
+
+        .. todo:: At the moment relying on the fact that json_output
+        is enabled. Need to ensure printing to stdout when json_output
+        is not enabled
+
         int iperf_run_server(struct iperf_test *);
         """
 
@@ -309,20 +422,9 @@ class IPerf3(object):
         stdout = os.dup(1)
         os.dup2(pipe_in, 1)
 
-        if self.role == 'c':
-            error = self.lib.iperf_run_client(self._test)
-            if error:
-                return {'error': self._error_to_string(self._errno)}
-            else:
-                # redirect stdout back to normal and parse received data
-                os.dup2(stdout, 1)
-                return json.loads(read_pipe(pipe_out))
+        self.lib.iperf_run_server(self._test)
 
-        elif self.role == 's':
-            self.lib.iperf_run_server(self._test)
-
-            # redirect stdout back to normal and parse received data
-            os.dup2(stdout, 1)
-            data = json.loads(read_pipe(pipe_out))
-            self.lib.iperf_reset_test(self._test)
-            return data
+        data = json.loads(read_pipe(pipe_out))
+        os.dup2(stdout, 1)
+        self.lib.iperf_reset_test(self._test)
+        return data
