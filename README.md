@@ -1,9 +1,10 @@
 iperf3 - Python interface to iperf3 using the libiperf API
 
-Documentation on [readthedocs.org](https://iperf3.readthedocs.org)
+Documentation on [readthedocs.org](https://iperf3-python.readthedocs.org/)
 
 [![Build Status](https://travis-ci.org/thiezn/iperf3-python.svg?branch=master)](https://travis-ci.org/thiezn/iperf3-python)
 [![Coverage Status](https://coveralls.io/repos/github/thiezn/iperf3-python/badge.svg?branch=master)](https://coveralls.io/github/thiezn/iperf3-python?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/iperf3-python/badge/?version=latest)](http://iperf3-python.readthedocs.io/en/latest/?badge=latest)
 
 ## Description
 
