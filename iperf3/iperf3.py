@@ -81,9 +81,9 @@ class IPerf3(object):
 
     @property
     def role(self):
-        """The iperf3 instance role, valid roles are client and server
+        """The iperf3 instance role
 
-        :return s (for server) or c (for client)
+        valid roles are 'c'=client and 's'=server
         """
         try:
             self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
@@ -93,12 +93,6 @@ class IPerf3(object):
 
     @role.setter
     def role(self, role):
-        """Set the role
-
-        :param role: c or s ('c=client, s=server')
-
-        void iperf_set_test_role( struct iperf_test *pt, char role );
-        """
         if role.lower() in ['c', 's']:
             self.lib.iperf_set_test_role(self._test,
                                          c_char(role.lower().encode('utf-8')))
@@ -108,7 +102,10 @@ class IPerf3(object):
 
     @property
     def bind_address(self):
-        """The bind address the iperf3 instance will listen on"""
+        """The bind address the iperf3 instance will listen on
+
+        use * to listen on all available IPs
+        """
         result = c_char_p(self.lib.iperf_get_test_bind_address(self._test)).value
         if result:
             self._bind_address = result.decode('utf-8')
@@ -119,12 +116,6 @@ class IPerf3(object):
 
     @bind_address.setter
     def bind_address(self, address):
-        """Set the bind address
-
-        :param address: address to bind on, * for all
-
-        void iperf_set_test_bind_address( struct iperf_test *t, char *bind_address );
-        """
         self.lib.iperf_set_test_bind_address(self._test,
                                              c_char_p(address.encode('utf-8')))
         self._bind_address = address
@@ -137,10 +128,6 @@ class IPerf3(object):
 
     @port.setter
     def port(self, port):
-        """Set the server port
-
-        void iperf_set_test_server_port( struct iperf_test *t, int port );
-        """
         self.lib.iperf_set_test_server_port(self._test, int(port))
         self._port = port
 
@@ -161,12 +148,6 @@ class IPerf3(object):
 
     @json_output.setter
     def json_output(self, enabled):
-        """Toggle json output
-
-        :param enabled: True or False
-
-        void iperf_set_test_json_output( struct iperf_test *t, int json_output );
-        """
         if enabled:
             self.lib.iperf_set_test_json_output(self._test, 1)
         else:
@@ -188,12 +169,6 @@ class IPerf3(object):
 
     @verbose.setter
     def verbose(self, enabled):
-        """Toggle verbose output
-
-        :param enabled: True or False
-
-        iperf_set_verbose(  struct iperf_test *t, int ? );
-        """
         if enabled:
             self.lib.iperf_set_verbose(self._test, 1)
         else:
@@ -263,7 +238,10 @@ class Client(IPerf3):
 
     @property
     def server_hostname(self):
-        """Get the server hostname"""
+        """The server hostname to connect to.
+
+        Accepts DNS entries or IP addresses
+        """
         result = c_char_p(self.lib.iperf_get_test_server_hostname(self._test)).value
         if result:
             self._server_hostname = result.decode('utf-8')
@@ -273,70 +251,49 @@ class Client(IPerf3):
 
     @server_hostname.setter
     def server_hostname(self, hostname):
-        """Set the server hostname
-
-        :param hostname: The hostname or IP address of the server
-
-        void iperf_set_test_server_hostname( struct iperf_test *t, char *server_host );
-        """
         self.lib.iperf_set_test_server_hostname(self._test,
                                                 c_char_p(hostname.encode('utf-8')))
         self._server_hostname = hostname
 
     @property
     def duration(self):
-        """Get the test duration"""
+        """The test duration in seconds."""
         self._duration = self.lib.iperf_get_test_duration(self._test)
         return self._duration
 
     @duration.setter
     def duration(self, duration):
-        """Set the test duration
-
-        :param duration: int The duration in seconds
-
-        void iperf_set_test_duration( struct iperf_test *t, int duration );
-        """
         self.lib.iperf_set_test_duration(self._test, duration)
         self._duration = duration
 
     @property
     def bulksize(self):
-        """Get the test bulksize"""
+        """The test bulksize."""
         self._bulksize = self.lib.iperf_get_test_blksize(self._test)
         return self._bulksize
 
     @bulksize.setter
     def bulksize(self, bulksize):
-        """Set the test bulksize
-
-        :param bulksize: int The bulksize to use
-
-        void iperf_set_test_blksize( struct iperf_test *t, int blksize );
-        """
         self.lib.iperf_set_test_blksize(self._test, bulksize)
         self._bulksize = bulksize
 
     @property
     def num_streams(self):
-        """Get the number of streams"""
+        """The number of streams to use."""
         self._num_streams = self.lib.iperf_get_test_num_streams(self._test)
         return self._num_streams
 
     @num_streams.setter
     def num_streams(self, number):
-        """Set the number of streams
-
-        :param number: int The number of streams to use
-
-        void iperf_set_test_num_streams( struct iperf_test *t, int num_streams );
-        """
         self.lib.iperf_set_test_num_streams(self._test, number)
         self._num_streams = number
 
     @property
     def zerocopy(self):
-        """Get the zerocopy value
+        """Toggle zerocopy.
+
+        Use the sendfile() system call for "Zero Copy" mode. This uses much
+        less CPU.
 
         .. todo:: This is not working as expected, perhaps need
                   to ensure the return is indeed 1
@@ -349,13 +306,6 @@ class Client(IPerf3):
 
     @zerocopy.setter
     def zerocopy(self, enabled):
-        """Set the zerocopy
-
-        Use the sendfile() system call for "Zero Copy" mode. This uses much
-        less CPU.
-
-        :param enabled: True or False
-        """
         if enabled:
             self.lib.iperf_set_test_zerocopy(self._test, 1)
         else:
@@ -364,11 +314,11 @@ class Client(IPerf3):
         self._zerocopy = enabled
 
     def run(self):
-        """Run the current test client
+        """Run the current test client.
 
         .. todo:: At the moment relying on the fact that json_output
-                  is enabled. Need to ensure printing to stdout when json_output
-                  is not enabled
+                  is enabled. Need to ensure printing to stdout when
+                  json_output is not enabled.
         """
 
         # Redirect stdout to a pipe to capture the libiperf output
@@ -403,11 +353,11 @@ class Server(IPerf3):
         super(Server, self).__init__(role='s', *args, **kwargs)
 
     def run(self):
-        """Run the current test server
+        """Run the iperf3 server instance.
 
         .. todo:: At the moment relying on the fact that json_output
-                  is enabled. Need to ensure printing to stdout when json_output
-                  is not enabled
+                  is enabled. Need to ensure printing to stdout when
+                  json_output is not enabled.
         """
 
         # Redirect stdout to a pipe to capture the libiperf output

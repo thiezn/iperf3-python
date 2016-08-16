@@ -13,14 +13,12 @@ Contents:
 
 .. automodule:: iperf3
 
-
 Client:
 
 The client class is used to connect to a running iperf3 server
 
 .. autoclass:: Client
     :members:
-
 
 Server:
 
