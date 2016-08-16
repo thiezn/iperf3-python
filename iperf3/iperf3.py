@@ -5,7 +5,6 @@ iperf3 for python
 ~~~~~~~~~~~~~~~~~
 
 Wrapper for the iperf3 libiperf.so.0 library.
-library explanation and examples using man libiperf
 """
 
 from ctypes import cdll, c_char_p, c_int, c_char
@@ -34,7 +33,7 @@ def read_pipe(pipe_out):
 
 
 class IPerf3(object):
-    """The base class used by both the iperf3 Server and Client
+    """The base class used by both the iperf3 :class:`Server` and :class:`Client`
 
     .. note:: You should not use this class directly
     """
@@ -66,7 +65,7 @@ class IPerf3(object):
         self.verbose = verbose
 
     def __del__(self):
-        """Cleanup the test after the IPerf3 class is terminated"""
+        """Cleanup the test after the :class:`IPerf3` class is terminated"""
         self.lib.iperf_free_test(self._test)
 
     def _new(self):
@@ -340,7 +339,7 @@ class Client(IPerf3):
         """Get the zerocopy value
 
         .. todo:: This is not working as expected, perhaps need
-        to ensure the return is indeed 1
+                  to ensure the return is indeed 1
         """
         # if self.lib.iperf_has_zerocopy() == 1:
         #     self._zerocopy = True
@@ -356,8 +355,6 @@ class Client(IPerf3):
         less CPU.
 
         :param enabled: True or False
-
-        void iperf_set_test_zerocopy( struct iperf_test* t, int zerocopy );
         """
         if enabled:
             self.lib.iperf_set_test_zerocopy(self._test, 1)
@@ -370,10 +367,8 @@ class Client(IPerf3):
         """Run the current test client
 
         .. todo:: At the moment relying on the fact that json_output
-        is enabled. Need to ensure printing to stdout when json_output
-        is not enabled
-
-        int iperf_run_client(struct iperf_test *);
+                  is enabled. Need to ensure printing to stdout when json_output
+                  is not enabled
         """
 
         # Redirect stdout to a pipe to capture the libiperf output
@@ -411,10 +406,8 @@ class Server(IPerf3):
         """Run the current test server
 
         .. todo:: At the moment relying on the fact that json_output
-        is enabled. Need to ensure printing to stdout when json_output
-        is not enabled
-
-        int iperf_run_server(struct iperf_test *);
+                  is enabled. Need to ensure printing to stdout when json_output
+                  is not enabled
         """
 
         # Redirect stdout to a pipe to capture the libiperf output

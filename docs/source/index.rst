@@ -11,9 +11,28 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   introduction.rst
-
 .. automodule:: iperf3
+
+
+Client:
+
+The client class is used to connect to a running iperf3 server
+
+.. autoclass:: Client
+    :members:
+
+
+Server:
+
+The server class is used to run a iperf3 server
+
+.. autoclass:: Server
+    :members:
+
+
+IPerf3:
+
+This is the Base class the Client and Server inherits from
 
 .. autoclass:: IPerf3
     :members:
