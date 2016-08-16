@@ -2,9 +2,11 @@
 
 """
 iperf3 for python
-~~~~~~~~~~~~~~~~~
+=================
 
 Wrapper for the iperf3 libiperf.so.0 library.
+
+.. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
 from ctypes import cdll, c_char_p, c_int, c_char
@@ -133,7 +135,7 @@ class IPerf3(object):
 
     @property
     def json_output(self):
-        """Toggles json output of libiperf
+        """Toggles json output of libiperf (bool)
 
         Turning this off will output the iperf3 instance results to
         stdout/stderr"""
@@ -157,7 +159,7 @@ class IPerf3(object):
 
     @property
     def verbose(self):
-        """Toggles verbose output for the iperf3 instance"""
+        """Toggles verbose output for the iperf3 instance (bool)"""
         enabled = self.lib.iperf_get_verbose(self._test)
 
         if enabled:

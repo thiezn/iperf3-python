@@ -3,24 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to iperf3's documentation!
-==================================
-
-Contents:
+Welcome to iperf3 for python documentation!
+===========================================
 
 .. toctree::
    :maxdepth: 2
 
+   examples.rst
+
 .. automodule:: iperf3
 
-Client:
+Client
+~~~~~~
 
 The client class is used to connect to a running iperf3 server
 
 .. autoclass:: Client
     :members:
 
-Server:
+Server
+~~~~~~
 
 The server class is used to run a iperf3 server
 
@@ -28,7 +30,8 @@ The server class is used to run a iperf3 server
     :members:
 
 
-IPerf3:
+IPerf3
+~~~~~~
 
 This is the Base class the Client and Server inherits from
 
