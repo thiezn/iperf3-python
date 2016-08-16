@@ -77,7 +77,10 @@ class IPerf3(object):
 
         :return s (for server) or c (for client)
         """
-        self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
+        try:
+            self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
+        except TypeError:
+            self._role = c_char(chr(self.lib.iperf_get_test_role(self._test))).value.decode('utf-8')
         return self._role
 
     @role.setter
