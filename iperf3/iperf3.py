@@ -292,7 +292,7 @@ class IPerf3(object):
         """Returns an error string if available"""
         strerror = self.lib.iperf_strerror
         strerror.restype = c_char_p
-        return strerror(error_id)
+        return strerror(error_id).decode('utf-8')
 
     def run(self):
         """Run the current test client
@@ -309,7 +309,7 @@ class IPerf3(object):
         if self.role == 'c':
             error = self.lib.iperf_run_client(self._test)
             if error:
-                print(self._error_to_string(self._errno))
+                return {'error': self._error_to_string(self._errno)}
             else:
                 # redirect stdout back to normal and parse received data
                 os.dup2(stdout, 1)

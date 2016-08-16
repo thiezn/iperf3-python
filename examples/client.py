@@ -8,7 +8,8 @@ def main():
     client.duration = 1
     client.server_hostname = '127.0.0.1'
     client.server_port = 5201
-    client.run()
+    response = client.run()
+    print(response)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 from iperf3 import IPerf3
 import pytest
+import subprocess
+from time import sleep
 
 
 class TestPyPerf:
@@ -88,4 +90,25 @@ class TestPyPerf:
 
     def test_error_to_string(self):
         client = IPerf3(role='c')
-        assert client._error_to_string(1) == b'cannot be both server and client'
+        assert client._error_to_string(1) == 'cannot be both server and client'
+
+    def test_client_run(self):
+        client = IPerf3(role='c')
+        client.server_hostname = '127.0.0.1'
+        client.server_port = 6969
+        client.duration = 1
+        response = client.run()
+        assert response == {'error': 'unable to connect to server: Connection refused'}
+
+    def test_client_succesful_run(self):
+        client = IPerf3(role='c')
+        client.server_hostname = '127.0.0.1'
+        client.server_port = 5201
+        client.duration = 1
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
