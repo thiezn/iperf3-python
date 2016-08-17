@@ -80,7 +80,11 @@ class IPerf3(object):
         :param lib_name: The libiperf name providing the API to iperf3
         """
         # TODO use find_library to find the best library
-        self.lib = cdll.LoadLibrary(lib_name)
+        try:
+            self.lib = cdll.LoadLibrary(lib_name)
+        except OSError:
+            raise OSError('Could not find shared library {}. Is iperf3 installed?'.format(lib_name))
+            exit(-1)
 
         # The test C struct iperf_test
         self._test = self._new()
@@ -101,7 +105,12 @@ class IPerf3(object):
 
     def __del__(self):
         """Cleanup the test after the :class:`IPerf3` class is terminated"""
-        self.lib.iperf_free_test(self._test)
+        try:
+            self.lib.iperf_free_test(self._test)
+        except AttributeError:
+            # self.lib doesn't exist, likely because iperf3 wasnt installed or
+            # the shared library libiperf.so.0 wasn't found
+            pass
 
     def _new(self):
         """Initialise a new iperf test
@@ -373,7 +382,8 @@ class Client(IPerf3):
         if error:
             data = {'error': self._error_to_string(self._errno)}
         else:
-            data = json.loads(read_pipe(self._pipe_out))
+            data = json.loads(c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value.decode('utf-8'))
+            # data = json.loads(read_pipe(self._pipe_out))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
@@ -386,6 +396,11 @@ class Server(IPerf3):
     This starts an iperf3 server session. The server terminates after each
     succesful client connection so it might be useful to run Server.run()
     in a loop.
+
+    **warnings** At the moment it's not possible to kill the server with
+                 ctrl+x because the GIL is passed onto the C library!
+                 see http://stackoverflow.com/questions/14271697/ctrlc-doesnt-interrupt-call-to-shared-library-using-ctypes-in-python
+                 for a possible workaround.
 
     Basic Usage::
 
@@ -412,7 +427,14 @@ class Server(IPerf3):
         output_to_pipe(self._pipe_in)
 
         self.lib.iperf_run_server(self._test)
-        data = json.loads(read_pipe(self._pipe_out))
+        data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
+
+        if not data:
+            data = {'error': self._error_to_string(self._errno)}
+        else:
+            data = json.loads(data.decode('utf-8'))
+
+        # data = json.loads(read_pipe(self._pipe_out))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 

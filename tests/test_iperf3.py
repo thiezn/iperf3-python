@@ -114,7 +114,7 @@ class TestPyPerf:
     def test_client_run(self):
         client = iperf3.Client()
         client.server_hostname = '127.0.0.1'
-        client.port = 6969
+        client.port = 5201
         client.duration = 1
         response = client.run()
         assert response == {'error': 'unable to connect to server: Connection refused'}
@@ -126,8 +126,24 @@ class TestPyPerf:
         client.duration = 1
 
         server = subprocess.Popen(["iperf3", "-s"])
-        sleep(1)  # give the server some time to start
+        sleep(.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
         assert response['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
+
+    def test_server_run(self):
+        server = iperf3.Server()
+        server.bind_address = '127.0.0.1'
+        server.port = 5201
+
+        # Launching the client with a sleep timer to give our server some time to start
+        client = subprocess.Popen('sleep .3 && iperf3 -c 127.0.0.1 5201 -t 1',
+                                  shell=True,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+        response = server.run()
+        client.kill()
+
+        assert response['start']['connected'][0]['local_host'] == '127.0.0.1'
+        assert response['start']['connected'][0]['local_port'] == 5201
