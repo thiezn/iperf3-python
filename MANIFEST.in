@@ -1,0 +1,2 @@
+include AUTHORS COPYING INSTALL LICENSE requirements.txt *.rst
+recursive-exclude *.pyc *.pyo

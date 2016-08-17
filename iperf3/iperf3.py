@@ -34,6 +34,25 @@ def read_pipe(pipe_out):
     return out.decode('utf-8')
 
 
+def output_to_pipe(pipe_in):
+    """Redirects stdout and stderr to a pipe
+
+    :param pipe_out: The pipe to redirect stdout and stderr to
+    """
+    os.dup2(pipe_in, 1)  # stdout
+    # os.dup2(pipe_in, 2)  # stderr
+
+
+def output_to_screen(stdout_fd, stderr_fd):
+    """Redirects stdout and stderr to a pipe
+
+    :param stdout_fd: The stdout file descriptor
+    :param stderr_fd: The stderr file descriptor
+    """
+    os.dup2(stdout_fd, 1)
+    #os.dup2(stderr_fd, 2)
+
+
 class IPerf3(object):
     """The base class used by both the iperf3 :class:`Server` and :class:`Client`
 
@@ -57,6 +76,11 @@ class IPerf3(object):
         # The test C struct iperf_test
         self._test = self._new()
         self.defaults()
+
+        # stdout/strerr redirection variables
+        self._stdout_fd = os.dup(1)
+        self._stderr_fd = os.dup(2)
+        self._pipe_out, self._pipe_in = os.pipe()  # no need for pipe write
 
         # TODO do we want to allow a user to change the json_output?
         # if so, we should disable the stdout pipe when json_output=False
@@ -135,10 +159,13 @@ class IPerf3(object):
 
     @property
     def json_output(self):
-        """Toggles json output of libiperf (bool)
+        """Toggles json output of libiperf
 
         Turning this off will output the iperf3 instance results to
-        stdout/stderr"""
+        stdout/stderr
+
+        :rtype: bool
+        """
         enabled = self.lib.iperf_get_test_json_output(self._test)
 
         if enabled:
@@ -159,7 +186,10 @@ class IPerf3(object):
 
     @property
     def verbose(self):
-        """Toggles verbose output for the iperf3 instance (bool)"""
+        """Toggles verbose output for the iperf3 instance
+
+        :rtype: bool
+        """
         enabled = self.lib.iperf_get_verbose(self._test)
 
         if enabled:
@@ -206,6 +236,8 @@ class IPerf3(object):
 
         This function has to be instantiated by the Client and Server
         instances
+
+        :rtype: NotImplementedError
         """
         raise NotImplementedError
 
@@ -318,22 +350,25 @@ class Client(IPerf3):
     def run(self):
         """Run the current test client.
 
+        :rtype: dict
+
         .. todo:: At the moment relying on the fact that json_output
                   is enabled. Need to ensure printing to stdout when
                   json_output is not enabled.
         """
 
-        # Redirect stdout to a pipe to capture the libiperf output
-        pipe_out, pipe_in = os.pipe()
-        stdout = os.dup(1)
-        os.dup2(pipe_in, 1)
+        output_to_pipe(self._pipe_in)
 
         error = self.lib.iperf_run_client(self._test)
-        os.dup2(stdout, 1)
+
         if error:
-            return {'error': self._error_to_string(self._errno)}
+            data = {'error': self._error_to_string(self._errno)}
         else:
-            return json.loads(read_pipe(pipe_out))
+            data = json.loads(read_pipe(self._pipe_out))
+
+        output_to_screen(self._stdout_fd, self._stderr_fd)
+
+        return data
 
 
 class Server(IPerf3):
@@ -357,19 +392,18 @@ class Server(IPerf3):
     def run(self):
         """Run the iperf3 server instance.
 
+        :rtype: dict
+
         .. todo:: At the moment relying on the fact that json_output
                   is enabled. Need to ensure printing to stdout when
                   json_output is not enabled.
         """
-
-        # Redirect stdout to a pipe to capture the libiperf output
-        pipe_out, pipe_in = os.pipe()
-        stdout = os.dup(1)
-        os.dup2(pipe_in, 1)
+        output_to_pipe(self._pipe_in)
 
         self.lib.iperf_run_server(self._test)
+        data = json.loads(read_pipe(self._pipe_out))
 
-        data = json.loads(read_pipe(pipe_out))
-        os.dup2(stdout, 1)
+        output_to_screen(self._stdout_fd, self._stderr_fd)
+
         self.lib.iperf_reset_test(self._test)
         return data

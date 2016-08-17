@@ -103,7 +103,7 @@ class TestPyPerf:
         client.duration = 1
 
         server = subprocess.Popen(["iperf3", "-s"])
-        sleep(.3)  # give the server some time to start
+        sleep(1)  # give the server some time to start
         response = client.run()
         server.kill()
 
