@@ -382,8 +382,8 @@ class Client(IPerf3):
         if error:
             data = {'error': self._error_to_string(self._errno)}
         else:
-            data = json.loads(c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value.decode('utf-8'))
-            # data = json.loads(read_pipe(self._pipe_out))
+            # data = json.loads(c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value.decode('utf-8'))
+            data = json.loads(read_pipe(self._pipe_out))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
@@ -427,14 +427,18 @@ class Server(IPerf3):
         output_to_pipe(self._pipe_in)
 
         self.lib.iperf_run_server(self._test)
-        data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
+
+        # TODO json_output_string not available on earlier iperf3 builds
+        # have to build in a version check using self.iperf_version
+        # The following line should work on later versions:
+        # data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
+        data = read_pipe(self._pipe_out)
 
         if not data:
             data = {'error': self._error_to_string(self._errno)}
         else:
-            data = json.loads(data.decode('utf-8'))
-
-        # data = json.loads(read_pipe(self._pipe_out))
+            data = json.loads(data)
+            #data = json.loads(data.decode('utf-8'))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
