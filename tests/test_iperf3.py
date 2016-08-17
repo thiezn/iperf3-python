@@ -61,7 +61,7 @@ class TestPyPerf:
 
     def test_iperf3_version(self):
         client = iperf3.Client()
-        assert client.iperf_version == 'NOTIMPLEMENTED'
+        assert 'iperf' in client.iperf_version
 
     def test_bulksize(self):
         client = iperf3.Client()

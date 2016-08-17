@@ -227,9 +227,9 @@ class IPerf3(object):
 
         .. todo:: NOT IMPLEMENTED AT THE MOMENT
         """
-        # TODO: need to extract this from libiperf somehow
-        # return c_int.in_dll(self.lib, "client_version").value
-        return 'NOTIMPLEMENTED'
+        # TODO: Is there a better way to get the const char than allocating 30?
+        VersionType = c_char * 30
+        return VersionType.in_dll(self.lib, "version").value.decode('utf-8')
 
     def _error_to_string(self, error_id):
         """Returns an error string from libiperf
