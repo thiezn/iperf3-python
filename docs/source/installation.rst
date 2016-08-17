@@ -17,14 +17,16 @@ Preferably get the latest build from the iperf3 `official website <http://softwa
 
 Otherwise try your OS package manager:
 
- - Ubuntu 14.04 LTS:
+- Ubuntu 14.04 LTS:
 
-::
+.. code-block:: bash
+
     sudo apt-get install iperf3
 
- - CentOS
+- CentOS/RedHat
 
-::
+.. code-block:: bash
+
     sudo yum install iperf3
 
 
@@ -33,12 +35,14 @@ iperf3 python wrapper
 
 Soon you will be able to do the following
 
-::
+.. code-block:: bash
+
     pip install iperf3
 
 But for now the only option is install manually from github:
 
-::
+.. code-block:: bash
+
     git clone https://github.com/thiezn/iperf3-python.git
     cd iperf3-python
     python3 setup.py test  # Optional testing of module using py.test (or py.test through tox)
