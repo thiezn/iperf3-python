@@ -14,9 +14,23 @@ class TestPyPerf:
         server = iperf3.Server()
         assert server._test
 
+    def test_run_not_implemented(self):
+        with pytest.raises(NotImplementedError):
+            client = iperf3.IPerf3(role='c')
+            client.run()
+
     def test_incorrect_role(self):
         with pytest.raises(ValueError):
             iperf3.IPerf3(role='bla')
+
+    def test_role_property(self):
+        client = iperf3.Client()
+        assert client.role == 'c'
+
+    def test_bind_address_empty(self):
+        client = iperf3.Client()
+        client.bind_address = ''
+        assert client.bind_address == None
 
     def test_bind_address(self):
         """Test setting of the bind address is properly passed
@@ -30,6 +44,11 @@ class TestPyPerf:
         server.port = 666
         assert server.port == 666
 
+    def test_server_hostname_empty(self):
+        client = iperf3.Client()
+        client.server_hostname = ''
+        assert client.server_hostname == None
+
     def test_server_hostname(self):
         server = iperf3.Server()
         server.server_hostname = 'localhost'
@@ -39,6 +58,10 @@ class TestPyPerf:
         client = iperf3.Client()
         client.duration = 666
         assert client.duration == 666
+
+    def test_iperf3_version(self):
+        client = iperf3.Client()
+        assert client.iperf_version == 'NOTIMPLEMENTED'
 
     def test_bulksize(self):
         client = iperf3.Client()
