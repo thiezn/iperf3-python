@@ -10,7 +10,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 
 def get_long_description():
-    return open("README.md").read()
+    return open("README.rst").read()
 
 
 class PyTest(TestCommand):

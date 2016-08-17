@@ -1,6 +1,7 @@
 iperf3 - Python interface to iperf3 using the libiperf API
 
-Documentation on `readthedocs.org`_
+Documentation on
+`readthedocs.org <https://iperf3-python.readthedocs.org/>`__
 
 |Build Status| |Coverage Status| |Documentation Status|
 
@@ -9,7 +10,8 @@ Description
 
 iperf3 for python provides a wrapper around the excellent iperf3
 utility. iperf3 is a complete rewrite of the original iperf
-implementation. more information on the `official iperf3 site`_
+implementation. more information on the `official iperf3
+site <https://iperf.fr/>`__
 
 iperf3 introduced an API called libiperf that allows you to easily
 interact with iperf3 from other languages. This library provides a
@@ -43,40 +45,41 @@ From github:
 Server
 ~~~~~~
 
-\`\`\`python >>> import iperf3
+.. code:: python
 
-            server = iperf3.Server() server.run() {‘start’:
-            {‘accepted\_connection’: {‘host’: ‘127.0.0.1’, ‘port’:
-            45995}, ‘version’: ‘iperf 3.0.6’, ‘timestamp’: {‘timesecs’:
-            1471333681, ‘time’: ‘Tue, 16 Aug 2016 07:48:01 GMT’},
-            ‘connected’: [{‘local\_host’: ‘127.0.0.1’, ‘local\_port’:
-            5201, ‘socket’: 8, ‘remote\_port’: 45996, ‘remote\_host’:
-            ‘127.0.0.1’}], ‘tcp\_mss\_default’: 16384, ‘system\_info’:
-            ‘Linux server.local 2.6.18-408.el5 #1 SMP Fri Dec 11
-            14:03:08 EST 2015 x86\_64 x86\_64 x86\_64
-            GNU/Linux:raw-latex:`\n`’, ‘test\_start’: {‘num\_streams’:
-            1, ‘blksize’: 131072, ‘omit’: 0, ‘protocol’: ‘TCP’, ‘bytes’:
-            0, ‘blocks’: 0, ‘duration’: 1, ‘reverse’: 0}, ‘cookie’:
-            ‘server.local.1471333681’}, ‘intervals’: [{‘streams’:
-            [{‘bits\_per\_second’: 18954200000.0, ‘socket’: 8, ‘end’:
-            1.00009, ‘omitted’: False, ‘bytes’: 2369470464, ‘start’: 0,
-            ‘seconds’: 1.00009}], ‘sum’: {‘omitted’: False,
-            ‘bits\_per\_second’: 18954200000.0, ‘end’: 1.00009, ‘bytes’:
-            2369470464, ‘start’: 0, ‘seconds’: 1.00009}}, {‘streams’:
-            [{‘bits\_per\_second’: 19773800000.0, ‘socket’: 8, ‘end’:
-            1.0388, ‘omitted’: False, ‘bytes’: 95682560, ‘start’:
-            1.00009, ‘seconds’: 0.0387108}], ‘sum’: {‘omitted’: False,
-            ‘bits\_per\_second’: 19773800000.0, ‘end’: 1.0388, ‘bytes’:
-            95682560, ‘start’: 1.00009, ‘seconds’: 0.0387108}}], ‘end’:
-            {‘cpu\_utilization\_percent’: {‘remote\_user’: 1.75867,
-            ‘remote\_system’: 63.1275, ‘host\_user’: 0.0386741,
-            ‘remote\_total’: 64.8035, ‘host\_total’: 7.81372,
-            ‘host\_system’: 7.70424}, ‘sum\_sent’: {‘start’: 0,
-            ‘bits\_per\_second’: 19019900000.0, ‘bytes’: 2469724160,
-            ‘end’: 1.0388, ‘seconds’: 1.0388}, ‘streams’
+    >>> import iperf3
 
-.. _readthedocs.org: https://iperf3-python.readthedocs.org/
-.. _official iperf3 site: https://iperf.fr/
+    >>> server = iperf3.Server()
+    >>> server.run()
+    {'start': {'accepted_connection': {'host': '127.0.0.1', 'port': 45995}, 'version': 'iperf 3.0.6', 'timestamp': {'timesecs': 1471333681, 'time': 'Tue, 16 Aug 2016 07:48:01 GMT'}, 'connected': [{'local_host': '127.0.0.1', 'local_port': 5201, 'socket': 8, 'remote_port': 45996, 'remote_host': '127.0.0.1'}], 'tcp_mss_default': 16384, 'system_info': 'Linux server.local 2.6.18-408.el5 #1 SMP Fri Dec 11 14:03:08 EST 2015 x86_64 x86_64 x86_64 GNU/Linux\n', 'test_start': {'num_streams': 1, 'blksize': 131072, 'omit': 0, 'protocol': 'TCP', 'bytes': 0, 'blocks': 0, 'duration': 1, 'reverse': 0}, 'cookie': 'server.local.1471333681'}, 'intervals': [{'streams': [{'bits_per_second': 18954200000.0, 'socket': 8, 'end': 1.00009, 'omitted': False, 'bytes': 2369470464, 'start': 0, 'seconds': 1.00009}], 'sum': {'omitted': False, 'bits_per_second': 18954200000.0, 'end': 1.00009, 'bytes': 2369470464, 'start': 0, 'seconds': 1.00009}}, {'streams': [{'bits_per_second': 19773800000.0, 'socket': 8, 'end': 1.0388, 'omitted': False, 'bytes': 95682560, 'start': 1.00009, 'seconds': 0.0387108}], 'sum': {'omitted': False, 'bits_per_second': 19773800000.0, 'end': 1.0388, 'bytes': 95682560, 'start': 1.00009, 'seconds': 0.0387108}}], 'end': {'cpu_utilization_percent': {'remote_user': 1.75867, 'remote_system': 63.1275, 'host_user': 0.0386741, 'remote_total': 64.8035, 'host_total': 7.81372, 'host_system': 7.70424}, 'sum_sent': {'start': 0, 'bits_per_second': 19019900000.0, 'bytes': 2469724160, 'end': 1.0388, 'seconds': 1.0388}, 'streams': [{'sender': {'bits_per_second': 19019900000.0, 'socket': 8, 'end': 1.0388, 'bytes': 2469724160, 'start': 0, 'seconds': 1.0388}, 'receiver': {'bits_per_second': 18984700000.0, 'socket': 8, 'end': 1.0388, 'bytes': 2465153024, 'start': 0, 'seconds': 1.0388}}], 'sum_received': {'start': 0, 'bits_per_second': 18984700000.0, 'bytes': 2465153024, 'end': 1.0388, 'seconds': 1.0388}}}
+
+Client
+~~~~~~
+
+.. code:: python
+
+    >>> import iperf3
+
+    >>> client = iperf3.Client()
+    >>> client.duration = 1
+    >>> client.server_hostname = '127.0.0.1'
+    >>> client.port = 5201
+    >>> client.run()
+    {'intervals': [{'sum': {'omitted': False, 'bytes': 3905486848, 'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0}, 'streams': [{'omitted': False, 'socket': 7, 'bytes': 3905486848, 'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0}]}], 'start': {'system_info': 'Linux server.local 2.6.18-408.el5 #1 SMP Fri Dec 11 14:03:08 EST 2015 x86_64 x86_64 x86_64 GNU/Linux\n', 'timestamp': {'time': 'Mon, 15 Aug 2016 14:23:28 GMT', 'timesecs': 1471271008}, 'test_start': {'duration': 1, 'blksize': 131072, 'protocol': 'TCP', 'bytes': 0, 'blocks': 0, 'omit': 0, 'num_streams': 1, 'reverse': 0}, 'version': 'iperf 3.0.6', 'cookie': 'server.local.1471271008', 'connected': [{'local_host': '127.0.0.1', 'remote_host': '127.0.0.1', 'remote_port': 5201, 'socket': 7, 'local_port': 59464}], 'tcp_mss_default': 16384, 'connecting_to': {'host': '127.0.0.1', 'port': 5201}}, 'end': {'cpu_utilization_percent': {'remote_user': 0.0407711, 'host_user': 1.665, 'host_total': 96.216, 'remote_system': 1.83275, 'host_system': 94.4439, 'remote_total': 1.83507}, 'streams': [{'receiver': {'socket': 7, 'bytes': 3905486848, 'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0}, 'sender': {'socket': 7, 'bytes': 3905486848, 'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0}}], 'sum_sent': {'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0, 'bytes': 3905486848}, 'sum_received': {'start': 0, 'seconds': 1.00005, 'end': 1.00005, 'bits_per_second': 31242500000.0, 'bytes': 3905486848}}}
+
+External Dependencies
+---------------------
+
+-  iperf3
+-  libiperf.0 (should come with iperf3)
+
+Testing
+-------
+
+Tested against Ubuntu 14.04 LTS standard iperf3 installation
+
+Tested against Python versions: - 2.7 - 3.3 - 3.4 - 3.5 - 3.5-dev -
+nightly
 
 .. |Build Status| image:: https://travis-ci.org/thiezn/iperf3-python.svg?branch=master
    :target: https://travis-ci.org/thiezn/iperf3-python
