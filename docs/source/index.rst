@@ -20,5 +20,6 @@ pythonic way.
 .. toctree::
    :maxdepth: 2
 
+   installation
    examples
    modules

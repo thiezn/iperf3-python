@@ -82,7 +82,6 @@ class IPerf3(object):
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
             raise OSError('Could not find shared library {}. Is iperf3 installed?'.format(lib_name))
-            exit(-1)
 
         # The test C struct iperf_test
         self._test = self._new()
@@ -232,7 +231,7 @@ class IPerf3(object):
     def iperf_version(self):
         """Returns the version of the libiperf library
 
-        .. todo:: NOT IMPLEMENTED AT THE MOMENT
+        rtype: string
         """
         # TODO: Is there a better way to get the const char than allocating 30?
         VersionType = c_char * 30
@@ -396,7 +395,7 @@ class Server(IPerf3):
     in a loop.
 
     **warnings** At the moment it's not possible to kill the server with
-                 ctrl+x because the GIL is passed onto the C library!
+                 ctrl+x because the GIL is released when calling the C library!
                  see http://stackoverflow.com/questions/14271697/ctrlc-doesnt-interrupt-call-to-shared-library-using-ctypes-in-python
                  for a possible workaround.
 
@@ -436,7 +435,7 @@ class Server(IPerf3):
             data = {'error': self._error_to_string(self._errno)}
         else:
             data = json.loads(data)
-            #data = json.loads(data.decode('utf-8'))
+            # data = json.loads(data.decode('utf-8'))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
