@@ -3,8 +3,12 @@
 Examples
 ========
 
-Full client options
-~~~~~~~~~~~~~~~~~~~
+Client
+~~~~~~
+
+This example sets up a client connection to a running server on 10.10.10.10:6969.
+When the test finalises the results are returned. This example shows all currently
+available options for a :class:`Client <iperf3.Client>`
 
 >>> import iperf3
 
@@ -18,3 +22,22 @@ Full client options
 >>> client.zerocopy = True
 >>> client.verbose = False
 >>> client.run()
+{'start': {'test_start': {...
+
+Server
+~~~~~~
+
+This example runs an iperf3 server on 10.10.10.10:6969 and prints out the test results.
+After each test ``server.run()`` finishes and produces the test results. This example
+shows all currently available options for a :class:`Server <iperf3.Server>`
+
+>>> import iperf3
+
+>>> server = iperf3.Server()
+>>> server.bind_address = '10.10.10.10'
+>>> server.port = 6969
+>>> server.verbose = False
+>>> while True:
+...     server.run()
+...
+{'start': {'test_start': {...

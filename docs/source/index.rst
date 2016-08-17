@@ -3,45 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to iperf3 for python documentation!
-===========================================
+iperf3 python wrapper
+=====================
+
+Release v\ |version|.
+
+iPerf3 is a tool for active measurements of the maximum achievable bandwidth on IP networks. More
+information on the iPerf3 utility can be found on their `official website <https://iperf.fr/>`_
+
+The python iperf3 module is a wrapper around the iperf3 utility. It utilises the API libiperf
+that comes with the default installation. It allows you to interact with the utility in a nice and
+pythonic way.
+
+**warning** This module is not compatible with the original iperf/iperf2 utility which is no longer under active development
 
 .. toctree::
    :maxdepth: 2
 
-   examples.rst
-
-.. automodule:: iperf3
-
-Client
-~~~~~~
-
-The client class is used to connect to a running iperf3 server
-
-.. autoclass:: Client
-    :members:
-
-Server
-~~~~~~
-
-The server class is used to run a iperf3 server
-
-.. autoclass:: Server
-    :members:
-
-
-IPerf3
-~~~~~~
-
-This is the Base class the Client and Server inherits from
-
-.. autoclass:: IPerf3
-    :members:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   examples
+   modules

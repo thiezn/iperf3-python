@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 
 """
-iperf3 for python
-=================
+Python wrapper for the iperf3 libiperf.so.0 library. The module consists of two
+classes, :class:`Client` and :class:`Server`, that inherit from the base class
+:class:`IPerf3`. They provide a nice (if i say so myself) and pythonic way to
+interact with the iperf3 utility.
 
-Wrapper for the iperf3 libiperf.so.0 library.
+At the moment the module redirects stdout and stderr to a pipe and returns the
+received data back after each ``client.run()`` or ``server.run()`` call. In later
+releases there will be an option to toggle this on or off.
+
+A user should never have to utilise the :class:`IPerf3` class directly, this class
+provides common settings for the :class:`Client` and :class:`Server` classes.
+
+To get started quickly see the :ref:`examples` page.
 
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
@@ -243,7 +252,7 @@ class IPerf3(object):
 
 
 class Client(IPerf3):
-    """A iperf3 client connection.
+    """An iperf3 client connection.
 
     This opens up a connection to a running iperf3 server
 
@@ -372,9 +381,11 @@ class Client(IPerf3):
 
 
 class Server(IPerf3):
-    """A iperf3 server connection.
+    """An iperf3 server connection.
 
-    This starts an iperf3 server session
+    This starts an iperf3 server session. The server terminates after each
+    succesful client connection so it might be useful to run Server.run()
+    in a loop.
 
     Basic Usage::
 
