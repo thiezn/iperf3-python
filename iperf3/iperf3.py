@@ -69,13 +69,11 @@ class IPerf3(object):
     """
     def __init__(self,
                  role,
-                 json_output=True,
                  verbose=True,
                  lib_name='libiperf.so.0'):
         """Initialise the iperf shared library
 
         :param role: 'c' = client; 's' = server
-        :param json_output: tells libiperf to output json output
         :param verbose: enable verbose output
         :param lib_name: The libiperf name providing the API to iperf3
         """
@@ -100,7 +98,7 @@ class IPerf3(object):
 
         # Generic test settings
         self.role = role
-        self.json_output = json_output
+        self.json_output = True
         self.verbose = verbose
 
     def __del__(self):

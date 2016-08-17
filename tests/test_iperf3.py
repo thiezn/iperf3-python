@@ -6,6 +6,10 @@ from time import sleep
 
 class TestPyPerf:
 
+    def test_unavailable_library(self):
+        with pytest.raises(OSError):
+            client = iperf3.Client(lib_name='bla')
+
     def test_init_client(self):
         client = iperf3.Client()
         assert client._test
@@ -52,6 +56,7 @@ class TestPyPerf:
     def test_server_hostname(self):
         server = iperf3.Server()
         server.server_hostname = 'localhost'
+        print(server.server_hostname)  # test the @property
         assert server.server_hostname == 'localhost'
 
     def test_duration(self):
