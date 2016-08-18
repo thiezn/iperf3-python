@@ -54,10 +54,9 @@ class TestPyPerf:
         assert client.server_hostname == None
 
     def test_server_hostname(self):
-        server = iperf3.Server()
-        server.server_hostname = 'localhost'
-        print(server.server_hostname)  # test the @property
-        assert server.server_hostname == 'localhost'
+        client = iperf3.Server()
+        client.server_hostname = '127.0.0.1'
+        assert client.server_hostname == '127.0.0.1'
 
     def test_duration(self):
         client = iperf3.Client()
@@ -116,7 +115,7 @@ class TestPyPerf:
         client = iperf3.Client()
         assert client._error_to_string(1) == 'cannot be both server and client'
 
-    def test_client_run(self):
+    def test_client_failed_run(self):
         client = iperf3.Client()
         client.server_hostname = '127.0.0.1'
         client.port = 5201
@@ -137,6 +136,21 @@ class TestPyPerf:
 
         assert response.json['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
 
+    def test_server_failed_run(self):
+        """This test will launch two server instances on the same ip:port
+        to generate an error"""
+        server = iperf3.Server()
+        server.bind_address = '127.0.0.1'
+        server.port = 5201
+
+        server2 = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+
+        response = server.run()
+        server2.kill()
+
+        assert "unable to start listener for connections: " in response.json['error']
+
     def test_server_run(self):
         server = iperf3.Server()
         server.bind_address = '127.0.0.1'
@@ -152,3 +166,9 @@ class TestPyPerf:
 
         assert response.json['start']['connected'][0]['local_host'] == '127.0.0.1'
         assert response.json['start']['connected'][0]['local_port'] == 5201
+
+    def test_test_result(self):
+        result = iperf3.TestResult('{"test": "me"}')
+        assert result.json
+        assert result.text
+        assert result.__repr__()

@@ -29,7 +29,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.1'
+__version__ = '0.0.1'
 
 
 def more_data(pipe_out):
@@ -435,7 +435,7 @@ class Server(IPerf3):
             data = read_pipe(self._pipe_out)
 
             if not data:
-                data = {'error': self._error_to_string(self._errno)}
+                data = '{"error": "%s"}' % self._error_to_string(self._errno)
 
             output_to_screen(self._stdout_fd, self._stderr_fd)
             self.lib.iperf_reset_test(self._test)
