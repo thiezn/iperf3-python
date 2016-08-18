@@ -18,7 +18,7 @@ pythonic way.
 **warning** This module is not compatible with the original iperf/iperf2 utility which is no longer under active development
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation
    examples

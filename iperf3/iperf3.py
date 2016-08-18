@@ -22,6 +22,12 @@ from ctypes import cdll, c_char_p, c_int, c_char
 import os
 import select
 import json
+import threading
+
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue  # Python2 compatibility
 
 __version__ = '0.1'
 
@@ -390,10 +396,8 @@ class Server(IPerf3):
     succesful client connection so it might be useful to run Server.run()
     in a loop.
 
-    **warnings** At the moment it's not possible to kill the server with
-                 ctrl+x because the GIL is released when calling the C library!
-                 see http://stackoverflow.com/questions/14271697/ctrlc-doesnt-interrupt-call-to-shared-library-using-ctypes-in-python
-                 for a possible workaround.
+    The C function iperf_run_server is called in a seperate thread to make
+    sure KeyboardInterrupt(aka ctrl+c) can still be captured
 
     Basic Usage::
 
@@ -413,26 +417,39 @@ class Server(IPerf3):
 
         :rtype: instance of :class:`TestResult`
         """
-        output_to_pipe(self._pipe_in)
 
-        self.lib.iperf_run_server(self._test)
+        def _run_in_thread(self, data_queue):
+            """Runs the iperf_run_server
 
-        # TODO json_output_string not available on earlier iperf3 builds
-        # have to build in a version check using self.iperf_version
-        # The following line should work on later versions:
-        # data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
-        data = read_pipe(self._pipe_out)
+            :param data_queue: thread-safe queue
+            """
 
-        if not data:
-            data = {'error': self._error_to_string(self._errno)}
-        # else:
-        #    data = json.loads(data)
-            # data = json.loads(data.decode('utf-8'))
+            output_to_pipe(self._pipe_in)
 
-        output_to_screen(self._stdout_fd, self._stderr_fd)
+            self.lib.iperf_run_server(self._test)
 
-        self.lib.iperf_reset_test(self._test)
-        return TestResult(data)
+            # TODO json_output_string not available on earlier iperf3 builds
+            # have to build in a version check using self.iperf_version
+            # The following line should work on later versions:
+            # data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
+            data = read_pipe(self._pipe_out)
+
+            if not data:
+                data = {'error': self._error_to_string(self._errno)}
+
+            output_to_screen(self._stdout_fd, self._stderr_fd)
+            self.lib.iperf_reset_test(self._test)
+            data_queue.put(data)
+
+        data_queue = Queue()
+
+        t = threading.Thread(target=_run_in_thread, args=[self, data_queue])
+        t.daemon = True
+        t.start()
+        while t.is_alive():
+            t.join(.1)
+
+        return TestResult(data_queue.get())
 
 
 class TestResult(object):
