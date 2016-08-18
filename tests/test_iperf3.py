@@ -58,6 +58,7 @@ class TestPyPerf:
     def test_server_hostname(self):
         client = iperf3.Server()
         client.server_hostname = '127.0.0.1'
+        print(client.server_hostname)
         assert client.server_hostname == '127.0.0.1'
 
     def test_duration(self):
@@ -138,6 +139,11 @@ class TestPyPerf:
 
         assert response.remote_host == '127.0.0.1'
         assert response.remote_port == 5201
+
+        # These are added to check some of the TestResult variables
+        assert response.reverse
+        assert response.type == 'client'
+        assert response.__repr__()
 
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port

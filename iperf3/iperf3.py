@@ -29,7 +29,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.0.1'
+__version__ = '0.1.0'
 
 
 def more_data(pipe_out):
@@ -527,7 +527,7 @@ class TestResult(object):
 
     @property
     def type(self):
-        if 'connected_to' in self.json['start']:
+        if 'connecting_to' in self.json['start']:
             return 'client'
         else:
             return 'server'
