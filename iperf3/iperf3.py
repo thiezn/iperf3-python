@@ -157,7 +157,7 @@ class IPerf3(object):
         if result:
             self._bind_address = result.decode('utf-8')
         else:
-            self._bind_address = None
+            self._bind_address = '*'
 
         return self._bind_address
 
@@ -423,7 +423,6 @@ class Server(IPerf3):
 
             :param data_queue: thread-safe queue
             """
-
             output_to_pipe(self._pipe_in)
 
             self.lib.iperf_run_server(self._test)
@@ -439,12 +438,14 @@ class Server(IPerf3):
 
             output_to_screen(self._stdout_fd, self._stderr_fd)
             self.lib.iperf_reset_test(self._test)
+
             data_queue.put(data)
 
         data_queue = Queue()
 
         t = threading.Thread(target=_run_in_thread, args=[self, data_queue])
         t.daemon = True
+
         t.start()
         while t.is_alive():
             t.join(.1)
@@ -460,8 +461,77 @@ class TestResult(object):
 
         :param result: raw json output from :class:`Client` and :class:`Server`
         """
+
+        # The full result data
         self.text = result
         self.json = json.loads(result)
 
+        if 'error' in self.json:
+            self.error = self.json['error']
+        else:
+            self.error = None
+
+            # start time
+            self.time = self.json['start']['timestamp']['time']
+            self.timesecs = self.json['start']['timestamp']['timesecs']
+
+            # generic info
+            self.system_info = self.json['start']['system_info']
+            self.version = self.json['start']['version']
+
+            # connection details
+            self.local_host = self.json['start']['connected'][0]['local_host']
+            self.local_port = self.json['start']['connected'][0]['local_port']
+            self.remote_host = self.json['start']['connected'][0]['remote_host']
+            self.remote_port = self.json['start']['connected'][0]['remote_port']
+
+            # test setup
+            self.tcp_mss_default = self.json['start']['tcp_mss_default']
+            self.protocol = self.json['start']['test_start']['protocol']
+            self.num_streams = self.json['start']['test_start']['num_streams']
+            self.bulksize = self.json['start']['test_start']['blksize']
+            self.omit = self.json['start']['test_start']['omit']
+            self.duration = self.json['start']['test_start']['duration']
+
+            # test results
+            self.sent_bytes = self.json['end']['sum_sent']['bytes']
+            self.sent_bps = self.json['end']['sum_sent']['bits_per_second']
+            self.sent_kbps = self.sent_bps / 1024           # Kilobits per second
+            self.sent_Mbps = self.sent_kbps / 1024          # Megabits per second
+            self.sent_kB_s = self.sent_kbps / 8             # kiloBytes per second
+            self.sent_MB_s = self.sent_Mbps / 8             # MegaBytes per second
+
+            self.received_bytes = self.json['end']['sum_received']['bytes']
+            self.received_bps = self.json['end']['sum_received']['bits_per_second']
+            self.received_kbps = self.received_bps / 1024   # Kilobits per second
+            self.received_Mbps = self.received_kbps / 1024  # Megabits per second
+            self.received_kB_s = self.received_kbps / 8     # kiloBytes per second
+            self.received_MB_s = self.received_Mbps / 8     # MegaBytes per second
+
+            # retransmits only returned from client
+            self.retransmits = self.json['end']['sum_sent'].get('retransmits', None)
+
+            self.local_cpu_total = self.json['end']['cpu_utilization_percent']['host_total']
+            self.local_cpu_user = self.json['end']['cpu_utilization_percent']['host_user']
+            self.local_cpu_system = self.json['end']['cpu_utilization_percent']['host_system']
+            self.remote_cpu_total = self.json['end']['cpu_utilization_percent']['remote_total']
+            self.remote_cpu_user = self.json['end']['cpu_utilization_percent']['remote_user']
+            self.remote_cpu_system = self.json['end']['cpu_utilization_percent']['remote_system']
+
+    @property
+    def reverse(self):
+        if self.json['start']['test_start']['reverse']:
+            return False
+        else:
+            return True
+
+    @property
+    def type(self):
+        if 'connected_to' in self.json['start']:
+            return 'client'
+        else:
+            return 'server'
+
     def __repr__(self):
+        """Print the result as received from iperf3"""
         return self.text

@@ -32,9 +32,11 @@ class TestPyPerf:
         assert client.role == 'c'
 
     def test_bind_address_empty(self):
+        """Test if we bind to any/all address when empty bind_address is
+        passed"""
         client = iperf3.Client()
         client.bind_address = ''
-        assert client.bind_address == None
+        assert client.bind_address == '*'
 
     def test_bind_address(self):
         """Test setting of the bind address is properly passed
@@ -121,7 +123,7 @@ class TestPyPerf:
         client.port = 5201
         client.duration = 1
         response = client.run()
-        assert response.json == {"error": "unable to connect to server: Connection refused"}
+        assert response.error == "unable to connect to server: Connection refused"
 
     def test_client_succesful_run(self):
         client = iperf3.Client()
@@ -134,7 +136,8 @@ class TestPyPerf:
         response = client.run()
         server.kill()
 
-        assert response.json['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5201
 
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port
@@ -149,7 +152,7 @@ class TestPyPerf:
         response = server.run()
         server2.kill()
 
-        assert "unable to start listener for connections: " in response.json['error']
+        assert "unable to start listener for connections: " in response.error
 
     def test_server_run(self):
         server = iperf3.Server()
@@ -164,11 +167,6 @@ class TestPyPerf:
         response = server.run()
         client.kill()
 
-        assert response.json['start']['connected'][0]['local_host'] == '127.0.0.1'
-        assert response.json['start']['connected'][0]['local_port'] == 5201
-
-    def test_test_result(self):
-        result = iperf3.TestResult('{"test": "me"}')
-        assert result.json
-        assert result.text
-        assert result.__repr__()
+        assert not response.error
+        assert response.local_host == '127.0.0.1'
+        assert response.local_port == 5201

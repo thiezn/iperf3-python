@@ -6,6 +6,14 @@ Examples
 Client
 ~~~~~~
 
+**Example 1**
+
+.. literalinclude:: ../../examples/client.py
+   :linenos:
+   :language: python
+
+**Example 2**
+
 This example sets up a client connection to a running server on 10.10.10.10:6969.
 When the test finalises the results are returned. This example shows all currently
 available options for a :class:`Client <iperf3.Client>`
@@ -26,6 +34,14 @@ available options for a :class:`Client <iperf3.Client>`
 
 Server
 ~~~~~~
+
+**Example 1**
+
+.. literalinclude:: ../../examples/server.py
+   :linenos:
+   :language: python
+
+**Example 2**
 
 This example runs an iperf3 server on 10.10.10.10:6969 and prints out the test results.
 After each test ``server.run()`` finishes and produces the test results. This example

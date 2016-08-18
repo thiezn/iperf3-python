@@ -33,17 +33,17 @@ Otherwise try your OS package manager:
 iperf3 python wrapper
 ~~~~~~~~~~~~~~~~~~~~~
 
-Soon you will be able to do the following
+The preferred installation method is through PyPi (aka pip install)
 
 .. code-block:: bash
 
     pip install iperf3
 
-But for now the only option is install manually from github:
+If pip is unavailable for any reason you can also manually install from github:
 
 .. code-block:: bash
 
     git clone https://github.com/thiezn/iperf3-python.git
     cd iperf3-python
-    python3 setup.py test  # Optional testing of module using py.test (or py.test through tox)
+    python3 setup.py test  # (optional) testing through py.test and/or tox
     python3 setup.py install
