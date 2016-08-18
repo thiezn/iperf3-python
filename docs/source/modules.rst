@@ -17,6 +17,11 @@ Server
 .. autoclass:: Server
     :members:
 
+TestResult
+++++++++++
+
+.. autoclass:: TestResult
+    :members:
 
 IPerf3
 ++++++

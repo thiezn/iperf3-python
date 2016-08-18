@@ -81,7 +81,7 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
-            raise OSError('Could not find shared library {}. Is iperf3 installed?'.format(lib_name))
+            raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
 
         # The test C struct iperf_test
         self._test = self._new()
@@ -365,11 +365,7 @@ class Client(IPerf3):
     def run(self):
         """Run the current test client.
 
-        :rtype: dict
-
-        .. todo:: At the moment relying on the fact that json_output
-                  is enabled. Need to ensure printing to stdout when
-                  json_output is not enabled.
+        :rtype: instance of :class:`TestResult`
         """
 
         output_to_pipe(self._pipe_in)
@@ -377,14 +373,14 @@ class Client(IPerf3):
         error = self.lib.iperf_run_client(self._test)
 
         if error:
-            data = {'error': self._error_to_string(self._errno)}
+            data = '{"error": "%s"}' % self._error_to_string(self._errno)
         else:
             # data = json.loads(c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value.decode('utf-8'))
-            data = json.loads(read_pipe(self._pipe_out))
+            data = read_pipe(self._pipe_out)
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
-        return data
+        return TestResult(data)
 
 
 class Server(IPerf3):
@@ -415,11 +411,7 @@ class Server(IPerf3):
     def run(self):
         """Run the iperf3 server instance.
 
-        :rtype: dict
-
-        .. todo:: At the moment relying on the fact that json_output
-                  is enabled. Need to ensure printing to stdout when
-                  json_output is not enabled.
+        :rtype: instance of :class:`TestResult`
         """
         output_to_pipe(self._pipe_in)
 
@@ -433,11 +425,26 @@ class Server(IPerf3):
 
         if not data:
             data = {'error': self._error_to_string(self._errno)}
-        else:
-            data = json.loads(data)
+        # else:
+        #    data = json.loads(data)
             # data = json.loads(data.decode('utf-8'))
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
         self.lib.iperf_reset_test(self._test)
-        return data
+        return TestResult(data)
+
+
+class TestResult(object):
+    """Class containing iperf3 test results"""
+
+    def __init__(self, result):
+        """Initialise TestResult
+
+        :param result: raw json output from :class:`Client` and :class:`Server`
+        """
+        self.text = result
+        self.json = json.loads(result)
+
+    def __repr__(self):
+        return self.text

@@ -122,7 +122,7 @@ class TestPyPerf:
         client.port = 5201
         client.duration = 1
         response = client.run()
-        assert response == {'error': 'unable to connect to server: Connection refused'}
+        assert response.json == {"error": "unable to connect to server: Connection refused"}
 
     def test_client_succesful_run(self):
         client = iperf3.Client()
@@ -135,7 +135,7 @@ class TestPyPerf:
         response = client.run()
         server.kill()
 
-        assert response['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
+        assert response.json['start']['connecting_to'] == {'host': '127.0.0.1', 'port': 5201}
 
     def test_server_run(self):
         server = iperf3.Server()
@@ -150,5 +150,5 @@ class TestPyPerf:
         response = server.run()
         client.kill()
 
-        assert response['start']['connected'][0]['local_host'] == '127.0.0.1'
-        assert response['start']['connected'][0]['local_port'] == 5201
+        assert response.json['start']['connected'][0]['local_host'] == '127.0.0.1'
+        assert response.json['start']['connected'][0]['local_port'] == 5201
