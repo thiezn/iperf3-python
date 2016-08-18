@@ -157,7 +157,7 @@ class TestPyPerf:
         server.port = 5201
 
         # Launching the client with a sleep timer to give our server some time to start
-        client = subprocess.Popen('sleep .3 && iperf3 -c 127.0.0.1 5201 -t 1',
+        client = subprocess.Popen('sleep .5 && iperf3 -c 127.0.0.1 5201 -t 1',
                                   shell=True,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE)
