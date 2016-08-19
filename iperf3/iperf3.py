@@ -19,6 +19,7 @@ To get started quickly see the :ref:`examples` page.
 """
 
 from ctypes import cdll, c_char_p, c_int, c_char
+from ctypes.util import find_library
 import os
 import select
 import json
@@ -87,7 +88,10 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
-            raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
+            try:
+                self.lib = cdll.LoadLibrary('libiperf.so.0.dylib')
+            except OSError:
+                raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
 
         # The test C struct iperf_test
         self._test = self._new()
