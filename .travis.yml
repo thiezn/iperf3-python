@@ -1,5 +1,5 @@
-sudo: required
-dist: trusty
+sudo: if [[ "$TRAVIS_OS_NAME" == "linux" ]]; required ;fi
+dist: if [[ "$TRAVIS_OS_NAME" == "linux" ]]; trusty ;fi
 language: python
 os:
     - linux
