@@ -1,7 +1,7 @@
 iperf3-python: Python wrapper around iperf3
 ===========================================
 
-|Build Status| |Coverage Status| |Documentation Status|
+|PyPi Status| |Build Status| |Coverage Status| |Documentation Status|
 
 Detailed documentation at
 `iperf3-python.readthedocs.org <https://iperf3-python.readthedocs.org/>`__
@@ -24,11 +24,21 @@ python module wraps around the libiperf API provided by it.
 
 The common linux distributions offer installations from their own repositories. These
 might be out of date so installation from the official `iperf3 website <http://software.es.net/iperf/>`__
-is preferred.
+is preferred. 
 
-Otherwise try your OS package manager:
+**warning** there seems to be an issue with iperf3 v3.0.7 causing a memory dump. To resolve this make sure
+to use the latest iperf3 version.
 
-- Ubuntu 14.04 LTS:
+- Install from source (preferred)
+
+.. code:: bash
+
+    wget http://downloads.es.net/pub/iperf/iperf-3-current.tar.gz
+    tar xvf iperf-3-current.tar.gz
+    cd iperf-3.1.3/                # Or whatever the latest version is
+    ./configure && make && make install
+
+- Ubuntu 16.04 LTS:
 
 .. code:: bash
 
@@ -105,6 +115,8 @@ Testing
     * 3.5-dev 
     * nightly
 
+.. |PyPi Status| image:: https://img.shields.io/pypi/v/iperf3.svg
+   :target: https://pypi.python.org/pypi/iperf3
 .. |Build Status| image:: https://travis-ci.org/thiezn/iperf3-python.svg?branch=master
    :target: https://travis-ci.org/thiezn/iperf3-python
 .. |Coverage Status| image:: https://coveralls.io/repos/github/thiezn/iperf3-python/badge.svg?branch=master
