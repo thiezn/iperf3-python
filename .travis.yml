@@ -1,22 +1,32 @@
-sudo: if [[ "$TRAVIS_OS_NAME" == "linux" ]]; required ;fi
-dist: if [[ "$TRAVIS_OS_NAME" == "linux" ]]; trusty ;fi
 language: python
-os:
-    - linux
-    - osx
-python:
-    - "2.6"
-    - "2.7"
-    - "3.3"
-    - "3.4"
-    - "3.5"
-    - "3.5-dev"
-    - "nightly"
+
+matrix:
+    include:
+        # Use the built in venv for linux builds
+        - os: linux
+          sudo: required
+          dist: trusty
+          python:
+              - "2.6"
+              - "2.7"
+              - "3.3"
+              - "3.4"
+              - "3.5"
+              - "3.5-dev"
+              - "nightly"
+        # Use generic language for osx
+        - os: osx
+          language: generic
 before_install:
+    # Install iperf3 on linux
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y iperf3 ;fi
+    # Install iperf3, python3 and activate venv for osx
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ;fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install iperf3 ;fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python3 ;fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then virtualenv venv -p python3 ;fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source venv/bin/activate ;fi
 install: 
     - "pip install -r requirements.txt"
     - "pip install coverage"
