@@ -32,8 +32,9 @@ matrix:
           dist: trusty
           python: "nightly"
         # Use generic language for osx
-        - os: osx
-          language: generic
+        allow_failures:
+          - os: osx
+            language: generic
 before_install:
     # Install iperf3 on linux
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq ;fi
