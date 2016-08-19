@@ -1,3 +1,4 @@
+language: python
 matrix:
     include:
         # Use the built in venv for linux builds
@@ -29,10 +30,6 @@ matrix:
           sudo: required
           dist: trusty
           python: "nightly"
-    # Use generic language for osx
-    - allow_failures:
-      - os: osx
-        language: generic
 before_install:
     # Install iperf3 on linux
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq ;fi
