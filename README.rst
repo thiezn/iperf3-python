@@ -108,6 +108,7 @@ Testing
 - Tested against Ubuntu 14.04 LTS standard iperf3 installation using `travis-ci <https://travis-ci.org/>`__
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
+    * 2.6
     * 2.7
     * 3.3
     * 3.4
