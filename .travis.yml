@@ -5,40 +5,52 @@ matrix:
         - os: linux
           sudo: required
           dist: trusty
-          python: "2.6"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "2.7"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "3.3"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "3.4"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "3.5"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "3.5-dev"
-        - os: linux
-          sudo: required
-          dist: trusty
-          python: "nightly"
+          python: 
+            - "2.6"
+            - "2.7"
+            - "3.3"
+            - "3.4"
+            - "3.5"
+            - "3.5-dev"
+            - "nightly"
           env:
-              - IPERF_VERSION="1.0.7"
-              - IPERF_VERSION="2.0.1"
+              - IPERF_VERSION="3.0.1"
+              - IPERF_VERSION="3.0.2"
+              - IPERF_VERSION="3.0.3"
+              - IPERF_VERSION="3.0.4"
+              - IPERF_VERSION="3.0.5"
+              - IPERF_VERSION="3.0.6"
+              - IPERF_VERSION="3.0.7"
+              - IPERF_VERSION="3.0.8"
+              - IPERF_VERSION="3.0.9"
+              - IPERF_VERSION="3.0.10"
+              - IPERF_VERSION="3.0.11"
+              - IPERF_VERSION="3.0.12"
+              - IPERF_VERSION="3.1"
+              - IPERF_VERSION="3.1.1"
+              - IPERF_VERSION="3.1.2"
+              - IPERF_VERSION="3.1.3"
 before_install:
-    # Install iperf3 on linux
-    - if [[ "$IPERF_VERSION" == "1.0.7" ]]; then wget https://iperf.fr/download/source/iperf-1.7.0-source.tar.gz ;fi
-    - if [[ "$IPERF_VERSION" == "2.0.1" ]]; then wget https://iperf.fr/download/source/iperf-2.0.1-source.tar.gz ;fi
+    # Download the various available iperf3 sources
+    - if [[ "$IPERF_VERSION" == "3.0.1" ]]; then wget https://iperf.fr/download/source/iperf-3.0.1-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.2" ]]; then wget https://iperf.fr/download/source/iperf-3.0.2-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.3" ]]; then wget https://iperf.fr/download/source/iperf-3.0.3-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.4" ]]; then wget https://iperf.fr/download/source/iperf-3.0.4-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.5" ]]; then wget https://iperf.fr/download/source/iperf-3.0.5-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.6" ]]; then wget https://iperf.fr/download/source/iperf-3.0.6-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.7" ]]; then wget https://iperf.fr/download/source/iperf-3.0.7-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.8" ]]; then wget https://iperf.fr/download/source/iperf-3.0.8-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.9" ]]; then wget https://iperf.fr/download/source/iperf-3.0.9-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.10" ]]; then wget https://iperf.fr/download/source/iperf-3.0.10-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.11" ]]; then wget https://iperf.fr/download/source/iperf-3.0.11-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.0.12" ]]; then wget https://iperf.fr/download/source/iperf-3.0.12-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.1" ]]; then wget https://iperf.fr/download/source/iperf-3.1-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.1.1" ]]; then wget https://iperf.fr/download/source/iperf-3.1.1-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.1.2" ]]; then wget https://iperf.fr/download/source/iperf-3.1.2-source.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.1.3" ]]; then wget https://iperf.fr/download/source/iperf-3.1.3-source.tar.gz ;fi
+    # Install iperf version selected above
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xvf iperf-*-source.tar.gz ;fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd iperf-*-source ;fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd iperf-*/ ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./bootstrap.sh ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure && make && make install ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .. ;fi
