@@ -1,18 +1,18 @@
 language: python
+python:
+    - "2.6"
+    - "2.7"
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "3.5-dev"
+    - "nightly"
 matrix:
     include:
         # Use the built in venv for linux builds
         - os: linux
           sudo: required
           dist: trusty
-          python:
-              - "2.6"
-              - "2.7"
-              - "3.3"
-              - "3.4"
-              - "3.5"
-              - "3.5-dev"
-              - "nightly"
           env:
               - IPERF_VERSION="3.0.1"
               - IPERF_VERSION="3.0.2"
