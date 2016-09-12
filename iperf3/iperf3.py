@@ -30,11 +30,15 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 def more_data(pipe_out):
-    """Check if there is more data left on the pipe"""
+    """Check if there is more data left on the pipe
+    
+    :param pipe_out: The os pipe_out
+    :rtype: bool
+    """
     r, _, _ = select.select([pipe_out], [], [], 0)
     return bool(r)
 
@@ -42,7 +46,11 @@ def more_data(pipe_out):
 def read_pipe(pipe_out):
     """Read data on a pipe
 
-    Used to capture stdout data produced by libiperf"""
+    Used to capture stdout data produced by libiperf
+    
+    :param pipe_out: The os pipe_out
+    :rtype: unicode string
+    """
     out = b''
     while more_data(pipe_out):
         out += os.read(pipe_out, 1024)
@@ -88,10 +96,7 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
-            try:
-                self.lib = cdll.LoadLibrary('libiperf.so.0.dylib')
-            except OSError:
-                raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
+            raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
 
         # The test C struct iperf_test
         self._test = self._new()
@@ -135,6 +140,8 @@ class IPerf3(object):
         """The iperf3 instance role
 
         valid roles are 'c'=client and 's'=server
+
+        :rtype: 'c' or 's'
         """
         try:
             self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
@@ -156,6 +163,7 @@ class IPerf3(object):
         """The bind address the iperf3 instance will listen on
 
         use * to listen on all available IPs
+        :rtype: string
         """
         result = c_char_p(self.lib.iperf_get_test_bind_address(self._test)).value
         if result:
@@ -234,14 +242,17 @@ class IPerf3(object):
 
     @property
     def _errno(self):
-        """Returns the last error ID"""
+        """Returns the last error ID
+        
+        :rtype: int
+        """
         return c_int.in_dll(self.lib, "i_errno").value
 
     @property
     def iperf_version(self):
         """Returns the version of the libiperf library
 
-        rtype: string
+        :rtype: string
         """
         # TODO: Is there a better way to get the const char than allocating 30?
         VersionType = c_char * 30
@@ -251,6 +262,7 @@ class IPerf3(object):
         """Returns an error string from libiperf
 
         :param error_id: The error_id produced by libiperf
+        :rtype: string
         """
         strerror = self.lib.iperf_strerror
         strerror.restype = c_char_p
@@ -300,6 +312,7 @@ class Client(IPerf3):
         """The server hostname to connect to.
 
         Accepts DNS entries or IP addresses
+        :rtype: string
         """
         result = c_char_p(self.lib.iperf_get_test_server_hostname(self._test)).value
         if result:
@@ -356,6 +369,8 @@ class Client(IPerf3):
 
         .. todo:: This is not working as expected, perhaps need
                   to ensure the return is indeed 1
+
+        :rtype: bool
         """
         # if self.lib.iperf_has_zerocopy() == 1:
         #     self._zerocopy = True
@@ -483,7 +498,55 @@ class Server(IPerf3):
 
 
 class TestResult(object):
-    """Class containing iperf3 test results"""
+    """Class containing iperf3 test results
+    
+    Available fields will be:
+            time        - Start time 
+            timesecs    - Start time in seconds
+
+            # generic info
+            system_info - System info
+            version     - Iperf Version
+
+            # connection details
+            local_host  - Local host ip
+            local_port  - Local port number
+            remote_host - Remote host ip
+            remote_port - Remote port number
+
+            # test setup
+            reverse
+            tcp_mss_default
+            protocol
+            num_streams
+            bulksize
+            omit
+            duration
+
+            # test results
+            sent_bytes
+            sent_bps
+            sent_kbps
+            sent_Mbps
+            sent_kB_s
+            sent_MB_s
+
+            received_bytes
+            received_bps
+            received_kbps
+            received_Mbps
+            received_kB_s
+            received_MB_s
+
+            retransmits  # Only returned from client
+
+            local_cpu_total
+            local_cpu_user
+            local_cpu_system
+            remote_cpu_total
+            remote_cpu_user
+            remote_cpu_system
+    """
 
     def __init__(self, result):
         """Initialise TestResult

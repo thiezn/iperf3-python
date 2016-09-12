@@ -26,8 +26,8 @@ The common linux distributions offer installations from their own repositories. 
 might be out of date so installation from the official `iperf3 website <http://software.es.net/iperf/>`__
 is preferred. 
 
-**warning** there seems to be an issue with iperf3 v3.0.7 causing a memory dump. To resolve this make sure
-to use the latest iperf3 version.
+**note** The libiperf API was only introduced in 3.0.6 so make sure you have an updated version
+of iperf3 installation.
 
 - Install from source (preferred)
 
@@ -36,7 +36,7 @@ to use the latest iperf3 version.
     wget http://downloads.es.net/pub/iperf/iperf-3-current.tar.gz
     tar xvf iperf-3-current.tar.gz
     cd iperf-3.1.3/                # Or whatever the latest version is
-    ./configure && make && make install
+    ./configure && make && sudo make install
 
 - Ubuntu 16.04 LTS:
 
@@ -100,21 +100,32 @@ External Dependencies
 ---------------------
 
 -  iperf3
--  libiperf.0 (should come with iperf3
+-  libiperf.so.0 (Comes with iperf3 >= 3.0.6)
 
 Testing
 -------
 
-- Tested against Ubuntu 14.04 LTS standard iperf3 installation using `travis-ci <https://travis-ci.org/>`__
+- Tested against the following iperf3 versions on Unix (ubuntu Trusty):
+  - 3.0.6
+  - 3.0.7
+  - 3.0.8
+  - 3.0.9
+  - 3.0.10
+  - 3.0.11
+  - 3.0.12
+  - 3.1
+  - 3.1.1
+  - 3.1.2
+  - 3.1.3
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
-    * 2.6
-    * 2.7
-    * 3.3
-    * 3.4
-    * 3.5
-    * 3.5-dev 
-    * nightly
+  - 2.6
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.5-dev 
+  - nightly
 
 .. |PyPi Status| image:: https://img.shields.io/pypi/v/iperf3.svg
    :target: https://pypi.python.org/pypi/iperf3
