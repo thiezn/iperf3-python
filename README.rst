@@ -36,7 +36,7 @@ of iperf3 installation.
     wget http://downloads.es.net/pub/iperf/iperf-3-current.tar.gz
     tar xvf iperf-3-current.tar.gz
     cd iperf-3.1.3/                # Or whatever the latest version is
-    ./configure && make && make install
+    ./configure && make && sudo make install
 
 - Ubuntu 16.04 LTS:
 
@@ -106,26 +106,26 @@ Testing
 -------
 
 - Tested against the following iperf3 versions on Unix (ubuntu Trusty).
-    * 3.0.6
-    * 3.0.7
-    * 3.0.8
-    * 3.0.9
-    * 3.0.10
-    * 3.0.11
-    * 3.0.12
-    * 3.1
-    * 3.1.1
-    * 3.1.2
-    * 3.1.3
+  - 3.0.6
+  - 3.0.7
+  - 3.0.8
+  - 3.0.9
+  - 3.0.10
+  - 3.0.11
+  - 3.0.12
+  - 3.1
+  - 3.1.1
+  - 3.1.2
+  - 3.1.3
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
-    * 2.6
-    * 2.7
-    * 3.3
-    * 3.4
-    * 3.5
-    * 3.5-dev 
-    * nightly
+  - 2.6
+  - 2.7
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.5-dev 
+  - nightly
 
 .. |PyPi Status| image:: https://img.shields.io/pypi/v/iperf3.svg
    :target: https://pypi.python.org/pypi/iperf3
