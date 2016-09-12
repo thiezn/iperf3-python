@@ -3,6 +3,12 @@
 Release History
 ---------------
 
+0.1.1 (2016-09-12)
+++++++++++++++++++
+
+- Added reverse test parameter (thanks to @cvicente)
+- Updated travis build to test against iperf3 versions 3.0.6 through 3.1.3
+
 0.1.0 (2016-08-18)
 ++++++++++++++++++
 
