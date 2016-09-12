@@ -252,7 +252,7 @@ class IPerf3(object):
     def iperf_version(self):
         """Returns the version of the libiperf library
 
-        rtype: string
+        :rtype: string
         """
         # TODO: Is there a better way to get the const char than allocating 30?
         VersionType = c_char * 30

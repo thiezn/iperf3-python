@@ -105,7 +105,7 @@ External Dependencies
 Testing
 -------
 
-- Tested against the following iperf3 versions on Unix (ubuntu Trusty).
+- Tested against the following iperf3 versions on Unix (ubuntu Trusty):
   - 3.0.6
   - 3.0.7
   - 3.0.8
