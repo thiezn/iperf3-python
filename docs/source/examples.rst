@@ -29,6 +29,7 @@ available options for a :class:`Client <iperf3.Client>`
 >>> client.num_streams = 10
 >>> client.zerocopy = True
 >>> client.verbose = False
+>>> client.reverse = True
 >>> client.run()
 {'start': {'test_start': {...
 

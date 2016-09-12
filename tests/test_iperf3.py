@@ -110,6 +110,16 @@ class TestPyPerf:
         client.zerocopy = False
         assert not client.zerocopy
 
+    def test_reverse_enabled(self):
+        client = iperf3.Client()
+        client.reverse = True
+        assert client.reverse
+
+    def test_reverse_disabled(self):
+        client = iperf3.Client()
+        client.reverse = False
+        assert not client.reverse
+
     def test_get_last_error(self):
         client = iperf3.Client()
         assert client._errno == 0

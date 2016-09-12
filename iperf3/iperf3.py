@@ -372,6 +372,31 @@ class Client(IPerf3):
 
         self._zerocopy = enabled
 
+
+    @property
+    def reverse(self):
+        """Toggles direction of test
+
+        :rtype: bool
+        """
+        enabled = self.lib.iperf_get_test_reverse(self._test)
+
+        if enabled:
+            self._reverse = True
+        else:
+            self._reverse = False
+
+        return self._reverse
+
+    @reverse.setter
+    def reverse(self, enabled):
+        if enabled:
+            self.lib.iperf_set_test_reverse(self._test, 1)
+        else:
+            self.lib.iperf_set_test_reverse(self._test, 0)
+
+        self._reverse = enabled
+
     def run(self):
         """Run the current test client.
 
