@@ -189,7 +189,6 @@ class TestPyPerf:
         assert response.protocol == 'UDP'
         assert response.__repr__()
 
-
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port
         to generate an error"""
