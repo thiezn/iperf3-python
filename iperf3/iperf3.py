@@ -34,8 +34,8 @@ except ImportError:
 __version__ = '0.1.1'
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
-Ptcp = SOCK_STREAM
-Pudp = SOCK_DGRAM
+PTCP = SOCK_STREAM
+PUDP = SOCK_DGRAM
 
 def more_data(pipe_out):
     """Check if there is more data left on the pipe
@@ -351,7 +351,7 @@ class Client(IPerf3):
 
     @bulksize.setter
     def bulksize(self, bulksize):
-        if self.protocol == Pudp:
+        if self.protocol == PUDP:
             if bulksize > MAX_UDP_BULKSIZE:
                 bulksize = MAX_UDP_BULKSIZE
         self.lib.iperf_set_test_blksize(self._test, bulksize)
@@ -378,7 +378,7 @@ class Client(IPerf3):
     def protocol(self, protocol):
         self.lib.set_protocol(self._test, int(protocol))
         self._protocol = protocol
-        if protocol == Pudp:
+        if protocol == PUDP:
             if self.bulksize > MAX_UDP_BULKSIZE:
                 self.bulksize = MAX_UDP_BULKSIZE
 
