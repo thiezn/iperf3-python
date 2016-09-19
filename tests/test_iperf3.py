@@ -151,7 +151,7 @@ class TestPyPerf:
         assert response.remote_port == 5201
 
         # These are added to check some of the TestResult variables
-        assert response.reverse
+        assert not response.reverse
         assert response.type == 'client'
         assert response.__repr__()
 

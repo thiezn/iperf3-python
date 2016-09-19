@@ -35,7 +35,7 @@ __version__ = '0.1.1'
 
 def more_data(pipe_out):
     """Check if there is more data left on the pipe
-    
+
     :param pipe_out: The os pipe_out
     :rtype: bool
     """
@@ -47,7 +47,7 @@ def read_pipe(pipe_out):
     """Read data on a pipe
 
     Used to capture stdout data produced by libiperf
-    
+
     :param pipe_out: The os pipe_out
     :rtype: unicode string
     """
@@ -243,7 +243,7 @@ class IPerf3(object):
     @property
     def _errno(self):
         """Returns the last error ID
-        
+
         :rtype: int
         """
         return c_int.in_dll(self.lib, "i_errno").value
@@ -499,9 +499,9 @@ class Server(IPerf3):
 
 class TestResult(object):
     """Class containing iperf3 test results
-    
+
     Available fields will be:
-            time        - Start time 
+            time        - Start time
             timesecs    - Start time in seconds
 
             # generic info
@@ -613,9 +613,9 @@ class TestResult(object):
     @property
     def reverse(self):
         if self.json['start']['test_start']['reverse']:
-            return False
-        else:
             return True
+        else:
+            return False
 
     @property
     def type(self):
