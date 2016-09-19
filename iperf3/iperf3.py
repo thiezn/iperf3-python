@@ -20,6 +20,7 @@ To get started quickly see the :ref:`examples` page.
 
 from ctypes import cdll, c_char_p, c_int, c_char
 from ctypes.util import find_library
+from socket import SOCK_STREAM, SOCK_DGRAM
 import os
 import select
 import json
@@ -32,6 +33,7 @@ except ImportError:
 
 __version__ = '0.1.1'
 
+MAX_UDP_BLOCKSIZE = (65535 - 8 - 20)
 
 def more_data(pipe_out):
     """Check if there is more data left on the pipe
@@ -305,6 +307,7 @@ class Client(IPerf3):
         self._server_hostname = None
         self._port = None
         self._num_streams = None
+        self._protocol = None
         self._zerocopy = False
 
     @property
@@ -360,6 +363,19 @@ class Client(IPerf3):
         self.lib.iperf_set_test_num_streams(self._test, number)
         self._num_streams = number
 
+    @property
+    def protocol(self):
+        """The protocol to use to generate traffic"""
+        self._protocol = self.lib.iperf_get_test_protocol_id(self._test)
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, protocol):
+        self.lib.set_protocol(self._test, int(protocol))
+        self._protocol = protocol
+        if protocol == SOCK_DGRAM:
+            if self.bulksize > MAX_UDP_BLOCKSIZE:
+                self.bulksize = MAX_UDP_BLOCKSIZE
     @property
     def zerocopy(self):
         """Toggle zerocopy.
