@@ -77,16 +77,16 @@ class TestPyPerf:
         client.bulksize = 666
         assert client.bulksize == 666
 
+    def test_protocol(self):
+        client = iperf3.Client()
+        client.protocol = SOCK_DGRAM
+        assert client.protocol == SOCK_DGRAM
+
     def test_wrong_bulksize_for_udp(self):
         client = iperf3.Client()
         client.protocol = SOCK_DGRAM
         client.bulksize = MAX_UDP_BULKSIZE + 1
         assert client.bulksize <= MAX_UDP_BULKSIZE
-
-    def test_protocol(self):
-        client = iperf3.Client()
-        client.protocol = SOCK_DGRAM
-        assert client.protocol == SOCK_DGRAM
 
     def test_num_streams(self):
         client = iperf3.Client()
