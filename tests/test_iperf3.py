@@ -2,6 +2,8 @@ import iperf3
 import pytest
 import subprocess
 from time import sleep
+from socket import SOCK_DGRAM, SOCK_STREAM
+from iperf3.iperf3 import MAX_UDP_BULKSIZE
 
 
 class TestPyPerf:
@@ -74,6 +76,17 @@ class TestPyPerf:
         client = iperf3.Client()
         client.bulksize = 666
         assert client.bulksize == 666
+
+    def test_wrong_bulksize_for_udp(self):
+        client = iperf3.Client()
+        client.protocol = SOCK_DGRAM
+        client.bulksize = MAX_UDP_BULKSIZE + 1
+        assert client.bulksize <= MAX_UDP_BULKSIZE
+
+    def test_protocol(self):
+        client = iperf3.Client()
+        client.protocol = SOCK_DGRAM
+        assert client.protocol == SOCK_DGRAM
 
     def test_num_streams(self):
         client = iperf3.Client()
@@ -154,6 +167,28 @@ class TestPyPerf:
         assert not response.reverse
         assert response.type == 'client'
         assert response.__repr__()
+
+    def test_udp_client_succesful_run(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5201
+        client.duration = 1
+        client.protocol = SOCK_DGRAM
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5201
+
+        # These are added to check some of the TestResult variables
+        assert not response.reverse
+        assert response.type == 'client'
+        assert response.protocol == 'UDP'
+        assert response.__repr__()
+
 
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port
