@@ -394,10 +394,10 @@ class Client(IPerf3):
 
         :rtype: bool
         """
-        # if self.lib.iperf_has_zerocopy() == 1:
-        #     self._zerocopy = True
-        # else:
-        #     self._zerocopy = False
+        if self.lib.iperf_get_test_zerocopy(self._test) == 1:
+            self._zerocopy = True
+        else:
+            self._zerocopy = False
         return self._zerocopy
 
     @zerocopy.setter
