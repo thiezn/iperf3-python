@@ -30,7 +30,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 def more_data(pipe_out):
@@ -365,28 +365,23 @@ class Client(IPerf3):
         """Toggle zerocopy.
 
         Use the sendfile() system call for "Zero Copy" mode. This uses much
-        less CPU.
+        less CPU. This is not supported on all systems.
 
-        .. todo:: This is not working as expected, perhaps need
-                  to ensure the return is indeed 1
+        **Note** there isn't a hook in the libiperf library for getting the current
+        configured value. Relying on zerocopy.setter function
 
         :rtype: bool
         """
-        # if self.lib.iperf_has_zerocopy() == 1:
-        #     self._zerocopy = True
-        # else:
-        #     self._zerocopy = False
         return self._zerocopy
 
     @zerocopy.setter
     def zerocopy(self, enabled):
-        if enabled:
+        if enabled and self.lib.iperf_has_zerocopy():
             self.lib.iperf_set_test_zerocopy(self._test, 1)
+            self._zerocopy = True
         else:
             self.lib.iperf_set_test_zerocopy(self._test, 0)
-
-        self._zerocopy = enabled
-
+            self._zerocopy = False
 
     @property
     def reverse(self):
@@ -425,7 +420,6 @@ class Client(IPerf3):
         if error:
             data = '{"error": "%s"}' % self._error_to_string(self._errno)
         else:
-            # data = json.loads(c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value.decode('utf-8'))
             data = read_pipe(self._pipe_out)
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
@@ -500,52 +494,47 @@ class Server(IPerf3):
 class TestResult(object):
     """Class containing iperf3 test results
 
-    Available fields will be:
-            time        - Start time
-            timesecs    - Start time in seconds
+    :param time: Start time
+    :param timesecs: Start time in seconds
 
-            # generic info
-            system_info - System info
-            version     - Iperf Version
+    :param system_info: System info
+    :param version: Iperf Version
 
-            # connection details
-            local_host  - Local host ip
-            local_port  - Local port number
-            remote_host - Remote host ip
-            remote_port - Remote port number
+    :param local_host: Local host ip
+    :param local_port: Local port number
+    :param remote_host: Remote host ip
+    :param remote_port: Remote port number
 
-            # test setup
-            reverse
-            tcp_mss_default
-            protocol
-            num_streams
-            bulksize
-            omit
-            duration
+    :param reverse
+    :param tcp_mss_default
+    :param protocol
+    :param num_streams
+    :param bulksize
+    :param omit
+    :param duration: Test duration in seconds
 
-            # test results
-            sent_bytes
-            sent_bps
-            sent_kbps
-            sent_Mbps
-            sent_kB_s
-            sent_MB_s
+    :param sent_bytes: Sent bytes
+    :param sent_bps: Sent bits per second
+    :param sent_kbps: sent kilobits per second
+    :param sent_Mbps: Sent Megabits per second
+    :param sent_kB_s: Sent kiloBytes per second
+    :param sent_MB_s: Sent MegaBytes per second
 
-            received_bytes
-            received_bps
-            received_kbps
-            received_Mbps
-            received_kB_s
-            received_MB_s
+    :param received_bytes:  Received bytes
+    :param received_bps: Received bits per second
+    :param received_kbps: Received kilobits per second
+    :param received_Mbps: Received Megabits per second
+    :param received_kB_s: Received kiloBytes per second
+    :param received_MB_s: Received MegaBytes per second
 
-            retransmits  # Only returned from client
+    :param retransmits: amount of retransmits (Only returned from client)
 
-            local_cpu_total
-            local_cpu_user
-            local_cpu_system
-            remote_cpu_total
-            remote_cpu_user
-            remote_cpu_system
+    :param local_cpu_total:
+    :param local_cpu_user:
+    :param local_cpu_system:
+    :param remote_cpu_total:
+    :param remote_cpu_user:
+    :param remote_cpu_system:
     """
 
     def __init__(self, result):
@@ -553,7 +542,6 @@ class TestResult(object):
 
         :param result: raw json output from :class:`Client` and :class:`Server`
         """
-
         # The full result data
         self.text = result
         self.json = json.loads(result)

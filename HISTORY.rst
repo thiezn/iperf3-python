@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.2 (2016-09-22)
+++++++++++++++++++
+- Improved zerocopy setter validation
+- Fix for incorrect return of reverse flag (thanks to @fciaccia)
+
 0.1.1 (2016-09-12)
 ++++++++++++++++++
 
