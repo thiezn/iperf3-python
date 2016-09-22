@@ -494,6 +494,10 @@ class Server(IPerf3):
 class TestResult(object):
     """Class containing iperf3 test results
 
+    :param text: The raw result from libiperf as text
+    :param json: The raw result from libiperf asjson/dict
+    :param error: Error captured during test, None if all ok
+    
     :param time: Start time
     :param timesecs: Start time in seconds
 
@@ -505,12 +509,12 @@ class TestResult(object):
     :param remote_host: Remote host ip
     :param remote_port: Remote port number
 
-    :param reverse
-    :param tcp_mss_default
-    :param protocol
-    :param num_streams
-    :param bulksize
-    :param omit
+    :param reverse:
+    :param tcp_mss_default:
+    :param protocol:
+    :param num_streams:
+    :param bulksize:
+    :param omit:
     :param duration: Test duration in seconds
 
     :param sent_bytes: Sent bytes
