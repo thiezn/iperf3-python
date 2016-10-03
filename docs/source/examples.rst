@@ -26,6 +26,7 @@ available options for a :class:`Client <iperf3.Client>`
 >>> client.server_hostname = '10.10.10.10'
 >>> client.port = 6969
 >>> client.bulksize = 1234
+>>> client.rate = '1G'
 >>> client.num_streams = 10
 >>> client.zerocopy = True
 >>> client.verbose = False
