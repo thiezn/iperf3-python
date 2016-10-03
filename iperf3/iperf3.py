@@ -18,7 +18,7 @@ To get started quickly see the :ref:`examples` page.
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
-from ctypes import cdll, c_char_p, c_int, c_char
+from ctypes import cdll, c_char_p, c_int, c_char, c_ulonglong
 from ctypes.util import find_library
 import os
 import select
@@ -30,7 +30,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 
 def more_data(pipe_out):
@@ -76,6 +76,31 @@ def output_to_screen(stdout_fd, stderr_fd):
     os.dup2(stdout_fd, 1)
     #os.dup2(stderr_fd, 2)
 
+def unit_atof_rate(bw):
+    """ Convert banwidth string to numeric form
+        e.g. 10M => 10000000
+
+    :param bw: bandwidth string
+    """
+    if len(bw) == 0:
+        raise ValueError('Bandwidth parameter cannot be empty')
+
+    n = bw.rstrip('gGmMkK')
+    if n == bw:
+        rate = int(n)
+    else:
+        suffix = bw[-1]
+        n = int(n)
+        if suffix == 'g' or suffix == 'G':
+            rate = n * (1000**3)
+        elif suffix == 'm' or suffix == 'M':
+            rate = n * (1000**2)
+        elif suffix == 'k' or suffix == 'K':
+            rate = n * 1000
+        else:
+            raise ValueError('Invalid bandwidth suffix')
+
+    return c_ulonglong(rate)
 
 class IPerf3(object):
     """The base class used by both the iperf3 :class:`Server` and :class:`Client`
@@ -302,6 +327,7 @@ class Client(IPerf3):
 
         # Internal variables
         self._bulksize = None
+        self._rate = None
         self._server_hostname = None
         self._port = None
         self._num_streams = None
@@ -348,6 +374,18 @@ class Client(IPerf3):
     def bulksize(self, bulksize):
         self.lib.iperf_set_test_blksize(self._test, bulksize)
         self._bulksize = bulksize
+
+    @property
+    def bandwidth(self):
+        """Max. bandwidth to test"""
+        self._rate = self.lib.iperf_get_test_rate(self._test)
+        return self._rate
+
+    @bandwidth.setter
+    def bandwidth(self, bw):
+        rate = unit_atof_rate(bw)
+        self.lib.iperf_set_test_rate(self._test, rate)
+        self._rate = rate
 
     @property
     def num_streams(self):
@@ -514,6 +552,7 @@ class TestResult(object):
     :param protocol:
     :param num_streams:
     :param bulksize:
+    :param rate
     :param omit:
     :param duration: Test duration in seconds
 

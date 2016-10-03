@@ -1,10 +1,35 @@
 import iperf3
+from ctypes import c_ulonglong
 import pytest
 import subprocess
 from time import sleep
 
 
 class TestPyPerf:
+
+    def test_unit_atof_rate_empty(self):
+        with pytest.raises(ValueError):
+            r = iperf3.unit_atof_rate('')
+
+    def test_unit_atof_rate_bad_suffix(self):
+        with pytest.raises(ValueError):
+            r = iperf3.unit_atof_rate('100Z')
+
+    def test_unit_atof_rate_num_only(self):
+        r = iperf3.unit_atof_rate('100')
+        assert r.value == c_ulonglong(100).value
+
+    def test_unit_atof_rate_k(self):
+        r = iperf3.unit_atof_rate('2K')
+        assert r.value == c_ulonglong(2000).value
+
+    def test_unit_atof_rate_m(self):
+        r = iperf3.unit_atof_rate('2M')
+        assert r.value == c_ulonglong(2000000).value
+
+    def test_unit_atof_rate_g(self):
+        r = iperf3.unit_atof_rate('2G')
+        assert r.value == c_ulonglong(2000000000).value
 
     def test_unavailable_library(self):
         with pytest.raises(OSError):
@@ -74,6 +99,11 @@ class TestPyPerf:
         client = iperf3.Client()
         client.bulksize = 666
         assert client.bulksize == 666
+
+    def test_bandwidth(self):
+        client = iperf3.Client()
+        client.bandwidth = '10M'
+        assert client.bandwidth == 10000000
 
     def test_num_streams(self):
         client = iperf3.Client()
