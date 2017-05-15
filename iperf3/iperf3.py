@@ -32,7 +32,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -476,18 +476,18 @@ class Client(IPerf3):
         :rtype: instance of :class:`TestResult`
         """
 
-        output_to_pipe(self._pipe_in)
-
-        error = self.lib.iperf_run_client(self._test)
-
-        if error:
-            data = '{"error": "%s"}' % self._error_to_string(self._errno)
-        else:
-            data = read_pipe(self._pipe_out)
-
-        output_to_screen(self._stdout_fd, self._stderr_fd)
-
         if self.json_output:
+            output_to_pipe(self._pipe_in)
+
+            error = self.lib.iperf_run_client(self._test)
+
+            if error:
+                data = '{"error": "%s"}' % self._error_to_string(self._errno)
+            else:
+                data = read_pipe(self._pipe_out)
+
+            output_to_screen(self._stdout_fd, self._stderr_fd)
+
             return TestResult(data)
         else:
             return None

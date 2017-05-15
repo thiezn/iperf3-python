@@ -125,9 +125,7 @@ Testing
 - Tested against the following Python versions:
 
   - 2.7
-  - 3.5
   - 3.6
-  - nightly
 
 .. |PyPi Status| image:: https://img.shields.io/pypi/v/iperf3.svg
    :target: https://pypi.python.org/pypi/iperf3

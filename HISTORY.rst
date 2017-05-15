@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.4 (2017-05-15)
+++++++++++++++++++
+- Fixed server json_output=False feature
+
 0.1.3 (2017-05-15)
 ++++++++++++++++++
 - Added UDP support (thanks to @fciaccia)

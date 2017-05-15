@@ -251,6 +251,22 @@ class TestPyPerf:
         assert response.local_port == 5201
         assert response.type == 'server'
 
+    def test_server_run_output_to_screen(self):
+        server = iperf3.Server()
+        server.bind_address = '127.0.0.1'
+        server.port = 5201
+        server.json_output = False
+
+        # Launching the client with a sleep timer to give our server some time to start
+        client = subprocess.Popen('sleep .5 && iperf3 -c 127.0.0.1 5201 -t 1',
+                                  shell=True,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE)
+        response = server.run()
+        client.kill()
+
+        assert not response
+
     def test_client_succesful_run_output_to_screen(self):
         """Test if we print iperf3 test output to screen when json_output = False."""
         client = iperf3.Client()
