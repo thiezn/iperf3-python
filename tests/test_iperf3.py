@@ -38,6 +38,9 @@ class TestPyPerf:
         client.protocol = 'udp'
         assert client.protocol == 'udp'
 
+        client.protocol = 'tcp'
+        assert client.protocol == 'tcp'
+
     def test_udp_bulksize_limit(self):
         """Ensure the bulksize can't exceed MAX_UDP_BULKSIZE"""
         MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -74,7 +77,6 @@ class TestPyPerf:
     def test_server_hostname(self):
         client = iperf3.Server()
         client.server_hostname = '127.0.0.1'
-        print(client.server_hostname)
         assert client.server_hostname == '127.0.0.1'
 
     def test_duration(self):
@@ -176,6 +178,26 @@ class TestPyPerf:
         assert response.type == 'client'
         assert response.__repr__()
 
+    def test_client_succesful_run_reverse(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5201
+        client.duration = 1
+        client.reverse = True
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5201
+
+        # These are added to check some of the TestResult variables
+        assert response.reverse
+        assert response.type == 'client'
+        assert response.__repr__()
+
     def test_client_succesful_run_udp(self):
         client = iperf3.Client()
         client.protocol = 'udp'
@@ -227,6 +249,7 @@ class TestPyPerf:
         assert not response.error
         assert response.local_host == '127.0.0.1'
         assert response.local_port == 5201
+        assert response.type == 'server'
 
     def test_client_succesful_run_output_to_screen(self):
         """Test if we print iperf3 test output to screen when json_output = False."""

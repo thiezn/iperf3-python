@@ -124,12 +124,9 @@ Testing
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
 
-  - 2.6
   - 2.7
-  - 3.3
-  - 3.4
   - 3.5
-  - 3.5-dev 
+  - 3.6
   - nightly
 
 .. |PyPi Status| image:: https://img.shields.io/pypi/v/iperf3.svg
