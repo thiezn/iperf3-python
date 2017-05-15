@@ -38,7 +38,7 @@ of iperf3 installation.
     cd iperf-3.1.3/                # Or whatever the latest version is
     ./configure && make && sudo make install
 
-- Ubuntu 16.04 LTS:
+- Ubuntu:
 
 .. code:: bash
 
@@ -68,7 +68,9 @@ You can also install directly from the github repository:
 Quickstart
 ----------
 
-For detailed examples check out the `examples page <http://iperf3-python.readthedocs.io/en/latest/examples.html>`__
+For detailed examples check out the `examples page <http://iperf3-python.readthedocs.io/en/latest/examples.html>`__ or
+the detailed documentation at `iperf3-python.readthedocs.org <https://iperf3-python.readthedocs.org/>`__
+
 
 **Server**
 
@@ -106,6 +108,7 @@ Testing
 -------
 
 - Tested against the following iperf3 versions on Unix (ubuntu Trusty):
+
   - 3.0.6
   - 3.0.7
   - 3.0.8
@@ -117,8 +120,10 @@ Testing
   - 3.1.1
   - 3.1.2
   - 3.1.3
+
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
+
   - 2.6
   - 2.7
   - 3.3

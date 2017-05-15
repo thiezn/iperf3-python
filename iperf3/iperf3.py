@@ -326,7 +326,8 @@ class Client(IPerf3):
     def server_hostname(self):
         """The server hostname to connect to.
 
-        Accepts DNS entries or IP addresses
+        Accepts DNS entries or IP addresses.
+
         :rtype: string
         """
         result = c_char_p(self.lib.iperf_get_test_server_hostname(self._test)).value
@@ -350,7 +351,7 @@ class Client(IPerf3):
 
         valid protocols are 'tcp' and 'udp'
 
-        :rtype: 'tcp' or 'udp'
+        :rtype: str
         """
         proto_id = self.lib.iperf_get_test_protocol_id(self._test)
 
@@ -564,7 +565,7 @@ class Server(IPerf3):
 
 
 class TestResult(object):
-    """Class containing iperf3 test results
+    """Class containing iperf3 test results.
 
     :param text: The raw result from libiperf as text
     :param json: The raw result from libiperf asjson/dict
@@ -581,13 +582,25 @@ class TestResult(object):
     :param remote_host: Remote host ip
     :param remote_port: Remote port number
 
-    :param reverse:
-    :param tcp_mss_default:
-    :param protocol:
-    :param num_streams:
+    :param reverse: Test ran in reverse direction
+    :param protocol: 'TCP' or 'UDP'
+    :param num_streams: Number of test streams
     :param bulksize:
     :param omit:
     :param duration: Test duration in seconds
+
+    :param local_cpu_total: The local total CPU load
+    :param local_cpu_user: The local user CPU load
+    :param local_cpu_system: The local system CPU load
+    :param remote_cpu_total: The remote total CPU load
+    :param remote_cpu_user: The remote user CPU load
+    :param remote_cpu_system: The remote system CPU load
+
+
+    TCP test specific
+
+    :param tcp_mss_default:
+    :param retransmits: amount of retransmits (Only returned from client)
 
     :param sent_bytes: Sent bytes
     :param sent_bps: Sent bits per second
@@ -603,14 +616,20 @@ class TestResult(object):
     :param received_kB_s: Received kiloBytes per second
     :param received_MB_s: Received MegaBytes per second
 
-    :param retransmits: amount of retransmits (Only returned from client)
 
-    :param local_cpu_total:
-    :param local_cpu_user:
-    :param local_cpu_system:
-    :param remote_cpu_total:
-    :param remote_cpu_user:
-    :param remote_cpu_system:
+    UDP test specific
+
+    :param bytes:
+    :param bps:
+    :param jitter_ms:
+    :param kbps:
+    :param Mbps:
+    :param kB_s:
+    :param MB_s:
+    :param packets:
+    :param lost_packets:
+    :param lost_percent:
+    :param seconds:
     """
 
     def __init__(self, result):

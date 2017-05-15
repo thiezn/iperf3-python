@@ -3,16 +3,12 @@
 Examples
 ========
 
+Check the examples/ folder for a few ready to go python scripts.
+
 Client
 ~~~~~~
 
 **Example 1**
-
-.. literalinclude:: ../../examples/client.py
-   :linenos:
-   :language: python
-
-**Example 2**
 
 This example sets up a client connection to a running server on 10.10.10.10:6969.
 When the test finalises the results are returned. This example shows all currently
@@ -33,7 +29,7 @@ available options for a :class:`Client <iperf3.Client>`
 >>> client.run()
 {'start': {'test_start': {...
 
-**Example 3**
+**Example 2**
 
 This example shows how you can output the client test results to screen, just like
 the iperf3 application itself does. Note it does NOT return a :class:`TestResult <iperf3.TestResult>`
@@ -56,25 +52,18 @@ Starting Test: protocol: TCP, 1 streams, 131072 byte blocks, omitting 0 seconds,
 >>> result
 None
 
-**Example 4**
+**Example 3**
 
 Here is an example of running a UDP test. Please read the official documentation on
 UDP testing as there can be a few catches.
 
 .. literalinclude:: ../../examples/udp_client.py
-   :linenos:
    :language: python
 
 Server
 ~~~~~~
 
 **Example 1**
-
-.. literalinclude:: ../../examples/server.py
-   :linenos:
-   :language: python
-
-**Example 2**
 
 This example runs an iperf3 server on 10.10.10.10:6969 and prints out the test results.
 After each test ``server.run()`` finishes and produces the test results. This example
