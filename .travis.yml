@@ -4,9 +4,7 @@ sudo: required
 dist: trusty
 python:
     - "2.7"
-    - "3.5"
     - "3.6"
-    - "nightly"
 env:
   - IPERF_VERSION="3.0.6"
   - IPERF_VERSION="3.0.7"
