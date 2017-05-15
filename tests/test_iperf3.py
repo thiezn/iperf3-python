@@ -31,6 +31,22 @@ class TestPyPerf:
         client = iperf3.Client()
         assert client.role == 'c'
 
+    def test_protocol_property(self):
+        client = iperf3.Client()
+        assert client.protocol == 'tcp'
+
+        client.protocol = 'udp'
+        assert client.protocol == 'udp'
+
+    def test_udp_bulksize_limit(self):
+        """Ensure the bulksize can't exceed MAX_UDP_BULKSIZE"""
+        MAX_UDP_BULKSIZE = (65535 - 8 - 20)
+        client = iperf3.Client()
+        client.protocol = 'udp'
+
+        client.bulksize = MAX_UDP_BULKSIZE + 10
+        assert client.bulksize == MAX_UDP_BULKSIZE
+
     def test_bind_address_empty(self):
         """Test if we bind to any/all address when empty bind_address is
         passed"""
@@ -160,6 +176,26 @@ class TestPyPerf:
         assert response.type == 'client'
         assert response.__repr__()
 
+    def test_client_succesful_run_udp(self):
+        client = iperf3.Client()
+        client.protocol = 'udp'
+        client.server_hostname = '127.0.0.1'
+        client.port = 5201
+        client.duration = 1
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5201
+
+        # These are added to check some of the TestResult variables
+        assert not response.reverse
+        assert response.type == 'client'
+        assert response.__repr__()
+
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port
         to generate an error"""
@@ -195,6 +231,22 @@ class TestPyPerf:
     def test_client_succesful_run_output_to_screen(self):
         """Test if we print iperf3 test output to screen when json_output = False."""
         client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5201
+        client.duration = 1
+        client.json_output = False
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response == None
+
+    def test_client_succesful_run_udp_output_to_screen(self):
+        """Test if we print iperf3 test output to screen when json_output = False."""
+        client = iperf3.Client()
+        client.protocol = 'udp'
         client.server_hostname = '127.0.0.1'
         client.port = 5201
         client.duration = 1

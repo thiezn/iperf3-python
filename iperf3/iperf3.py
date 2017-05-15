@@ -24,13 +24,18 @@ import os
 import select
 import json
 import threading
+from socket import SOCK_DGRAM, SOCK_STREAM
 
 try:
     from queue import Queue
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
+
 __version__ = '0.1.3'
+
+
+MAX_UDP_BULKSIZE = (65535 - 8 - 20)
 
 
 def more_data(pipe_out):
@@ -111,6 +116,7 @@ class IPerf3(object):
         self.role = role
         self.json_output = True
         self.verbose = verbose
+
 
     def __del__(self):
         """Cleanup the test after the :class:`IPerf3` class is terminated"""
@@ -314,6 +320,7 @@ class Client(IPerf3):
         self._num_streams = None
         self._zerocopy = False
         self._bandwidth = None
+        self._protocol = None
 
     @property
     def server_hostname(self):
@@ -338,6 +345,35 @@ class Client(IPerf3):
         self._server_hostname = hostname
 
     @property
+    def protocol(self):
+        """The iperf3 instance protocol
+
+        valid protocols are 'tcp' and 'udp'
+
+        :rtype: 'tcp' or 'udp'
+        """
+        proto_id = self.lib.iperf_get_test_protocol_id(self._test)
+
+        if proto_id == SOCK_STREAM:
+            self._protocol = 'tcp'
+        elif proto_id == SOCK_DGRAM:
+            self._protocol = 'udp'
+
+        return self._protocol
+
+    @protocol.setter
+    def protocol(self, protocol):
+        if protocol == 'tcp':
+            self.lib.set_protocol(self._test, int(SOCK_STREAM))
+        elif protocol == 'udp':
+            self.lib.set_protocol(self._test, int(SOCK_DGRAM))
+
+            if self.bulksize > MAX_UDP_BULKSIZE:
+                self.bulksize = MAX_UDP_BULKSIZE
+
+        self._protocol = protocol
+
+    @property
     def duration(self):
         """The test duration in seconds."""
         self._duration = self.lib.iperf_get_test_duration(self._test)
@@ -350,14 +386,14 @@ class Client(IPerf3):
 
     @property
     def bandwidth(self):
+        """Target bandwidth in bits/sec"""
         self._bandwidth = self.lib.iperf_get_test_rate(self._test)
         return self._bandwidth
 
     @bandwidth.setter
-    def bandwidth(self, rate):
-        """Target bandwidth in bits/sec"""
-        self.lib.iperf_set_test_rate(self._test, rate)
-        self._bandwidth = rate
+    def bandwidth(self, bandwidth):
+        self.lib.iperf_set_test_rate(self._test, bandwidth)
+        self._bandwidth = bandwidth
 
     @property
     def bulksize(self):
@@ -367,6 +403,11 @@ class Client(IPerf3):
 
     @bulksize.setter
     def bulksize(self, bulksize):
+        # iperf version < 3.1.3 has some weird bugs when bulksize is
+        # larger than MAX_UDP_BULKSIZE
+        if self.protocol == 'udp' and bulksize > MAX_UDP_BULKSIZE:
+            bulksize = MAX_UDP_BULKSIZE
+
         self.lib.iperf_set_test_blksize(self._test, bulksize)
         self._bulksize = bulksize
 
@@ -601,37 +642,54 @@ class TestResult(object):
             self.remote_port = self.json['start']['connected'][0]['remote_port']
 
             # test setup
-            self.tcp_mss_default = self.json['start']['tcp_mss_default']
+            self.tcp_mss_default = self.json['start'].get('tcp_mss_default', None)
             self.protocol = self.json['start']['test_start']['protocol']
             self.num_streams = self.json['start']['test_start']['num_streams']
             self.bulksize = self.json['start']['test_start']['blksize']
             self.omit = self.json['start']['test_start']['omit']
             self.duration = self.json['start']['test_start']['duration']
 
-            # test results
-            self.sent_bytes = self.json['end']['sum_sent']['bytes']
-            self.sent_bps = self.json['end']['sum_sent']['bits_per_second']
-            self.sent_kbps = self.sent_bps / 1024           # Kilobits per second
-            self.sent_Mbps = self.sent_kbps / 1024          # Megabits per second
-            self.sent_kB_s = self.sent_kbps / 8             # kiloBytes per second
-            self.sent_MB_s = self.sent_Mbps / 8             # MegaBytes per second
-
-            self.received_bytes = self.json['end']['sum_received']['bytes']
-            self.received_bps = self.json['end']['sum_received']['bits_per_second']
-            self.received_kbps = self.received_bps / 1024   # Kilobits per second
-            self.received_Mbps = self.received_kbps / 1024  # Megabits per second
-            self.received_kB_s = self.received_kbps / 8     # kiloBytes per second
-            self.received_MB_s = self.received_Mbps / 8     # MegaBytes per second
-
-            # retransmits only returned from client
-            self.retransmits = self.json['end']['sum_sent'].get('retransmits', None)
-
+            # system performance
             self.local_cpu_total = self.json['end']['cpu_utilization_percent']['host_total']
             self.local_cpu_user = self.json['end']['cpu_utilization_percent']['host_user']
             self.local_cpu_system = self.json['end']['cpu_utilization_percent']['host_system']
             self.remote_cpu_total = self.json['end']['cpu_utilization_percent']['remote_total']
             self.remote_cpu_user = self.json['end']['cpu_utilization_percent']['remote_user']
             self.remote_cpu_system = self.json['end']['cpu_utilization_percent']['remote_system']
+
+            # TCP specific test results
+            if self.protocol == 'TCP':
+                self.sent_bytes = self.json['end']['sum_sent']['bytes']
+                self.sent_bps = self.json['end']['sum_sent']['bits_per_second']
+                self.received_bytes = self.json['end']['sum_received']['bytes']
+                self.received_bps = self.json['end']['sum_received']['bits_per_second']
+
+                self.sent_kbps = self.sent_bps / 1024           # Kilobits per second
+                self.sent_Mbps = self.sent_kbps / 1024          # Megabits per second
+                self.sent_kB_s = self.sent_kbps / 8             # kiloBytes per second
+                self.sent_MB_s = self.sent_Mbps / 8             # MegaBytes per second
+
+                self.received_kbps = self.received_bps / 1024   # Kilobits per second
+                self.received_Mbps = self.received_kbps / 1024  # Megabits per second
+                self.received_kB_s = self.received_kbps / 8     # kiloBytes per second
+                self.received_MB_s = self.received_Mbps / 8     # MegaBytes per second
+
+                # retransmits only returned from client
+                self.retransmits = self.json['end']['sum_sent'].get('retransmits', None)
+
+            # UDP specific test results
+            elif self.protocol == 'UDP':
+                self.bytes = self.json['end']['sum']['bytes']
+                self.bps = self.json['end']['sum']['bits_per_second']
+                self.jitter_ms = self.json['end']['sum']['jitter_ms']
+                self.kbps = self.bps / 1024
+                self.Mbps = self.kbps / 1024
+                self.kB_s = self.kbps / 8
+                self.MB_s = self.Mbps / 8
+                self.packets = self.json['end']['sum']['packets']
+                self.lost_packets = self.json['end']['sum']['lost_packets']
+                self.lost_percent = self.json['end']['sum']['lost_percent']
+                self.seconds = self.json['end']['sum']['seconds']
 
     @property
     def reverse(self):

@@ -5,6 +5,7 @@ Release History
 
 0.1.3 (2017-05-15)
 ++++++++++++++++++
+- Added UDP support (thanks to @fciaccia)
 - Added bandwidth parameter
 - json_output = False will now print testresults to screen
 

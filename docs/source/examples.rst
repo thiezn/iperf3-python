@@ -56,6 +56,15 @@ Starting Test: protocol: TCP, 1 streams, 131072 byte blocks, omitting 0 seconds,
 >>> result
 None
 
+**Example 4**
+
+Here is an example of running a UDP test. Please read the official documentation on
+UDP testing as there can be a few catches.
+
+.. literalinclude:: ../../examples/udp_client.py
+   :linenos:
+   :language: python
+
 Server
 ~~~~~~
 
