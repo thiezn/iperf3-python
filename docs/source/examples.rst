@@ -33,6 +33,29 @@ available options for a :class:`Client <iperf3.Client>`
 >>> client.run()
 {'start': {'test_start': {...
 
+**Example 3**
+
+This example shows how you can output the client test results to screen, just like
+the iperf3 application itself does. Note it does NOT return a :class:`TestResult <iperf3.TestResult>`
+instance.
+
+>>> import iperf3
+
+>>> client = iperf3.Client()
+>>> client.server_hostname = '10.10.10.10'
+>>> client.port = 6969
+>>> client.json_output = False
+>>> result = client.run()
+Time: Mon, 15 May 2017 18:20:01 GMT
+Connecting to host 10.10.10.10, port 6969
+[  8] local 127.0.0.1 port 35670 connected to 127.0.0.1 port 5201
+Starting Test: protocol: TCP, 1 streams, 131072 byte blocks, omitting 0 seconds, 1 second test
+[ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
+[  8]   0.00-1.00   sec  3.96 GBytes  34.0 Gbits/sec    0   3.18 MByt...
+
+>>> result
+None
+
 Server
 ~~~~~~
 

@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.3 (2017-05-15)
+++++++++++++++++++
+- Added bandwidth parameter
+- json_output = False will now print testresults to screen
+
 0.1.2 (2016-09-22)
 ++++++++++++++++++
 - Improved zerocopy setter validation

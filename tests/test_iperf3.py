@@ -75,6 +75,11 @@ class TestPyPerf:
         client.bulksize = 666
         assert client.bulksize == 666
 
+    def test_bandwidth(self):
+        client = iperf3.Client()
+        client.bandwidth = 1
+        assert client.bandwidth == 1
+
     def test_num_streams(self):
         client = iperf3.Client()
         client.num_streams = 666
@@ -186,3 +191,18 @@ class TestPyPerf:
         assert not response.error
         assert response.local_host == '127.0.0.1'
         assert response.local_port == 5201
+
+    def test_client_succesful_run_output_to_screen(self):
+        """Test if we print iperf3 test output to screen when json_output = False."""
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5201
+        client.duration = 1
+        client.json_output = False
+
+        server = subprocess.Popen(["iperf3", "-s"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response == None

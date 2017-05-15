@@ -30,7 +30,7 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 
 def more_data(pipe_out):
@@ -74,7 +74,7 @@ def output_to_screen(stdout_fd, stderr_fd):
     :param stderr_fd: The stderr file descriptor
     """
     os.dup2(stdout_fd, 1)
-    #os.dup2(stderr_fd, 2)
+    # os.dup2(stderr_fd, 2)
 
 
 class IPerf3(object):
@@ -107,9 +107,6 @@ class IPerf3(object):
         self._stderr_fd = os.dup(2)
         self._pipe_out, self._pipe_in = os.pipe()  # no need for pipe write
 
-        # TODO do we want to allow a user to change the json_output?
-        # if so, we should disable the stdout pipe when json_output=False
-
         # Generic test settings
         self.role = role
         self.json_output = True
@@ -120,8 +117,8 @@ class IPerf3(object):
         try:
             self.lib.iperf_free_test(self._test)
         except AttributeError:
-            # self.lib doesn't exist, likely because iperf3 wasnt installed or
-            # the shared library libiperf.so.0 wasn't found
+            # self.lib doesn't exist, likely because iperf3 wasn't installed or
+            # the shared library libiperf.so.0 could not be found
             pass
 
     def _new(self):
@@ -144,16 +141,22 @@ class IPerf3(object):
         :rtype: 'c' or 's'
         """
         try:
-            self._role = c_char(self.lib.iperf_get_test_role(self._test)).value.decode('utf-8')
+            self._role = c_char(
+                self.lib.iperf_get_test_role(self._test)
+            ).value.decode('utf-8')
         except TypeError:
-            self._role = c_char(chr(self.lib.iperf_get_test_role(self._test))).value.decode('utf-8')
+            self._role = c_char(
+                chr(self.lib.iperf_get_test_role(self._test))
+            ).value.decode('utf-8')
         return self._role
 
     @role.setter
     def role(self, role):
         if role.lower() in ['c', 's']:
-            self.lib.iperf_set_test_role(self._test,
-                                         c_char(role.lower().encode('utf-8')))
+            self.lib.iperf_set_test_role(
+                self._test,
+                c_char(role.lower().encode('utf-8'))
+            )
             self._role = role
         else:
             raise ValueError("Unknown role, accepted values are 'c' and 's'")
@@ -165,7 +168,9 @@ class IPerf3(object):
         use * to listen on all available IPs
         :rtype: string
         """
-        result = c_char_p(self.lib.iperf_get_test_bind_address(self._test)).value
+        result = c_char_p(
+            self.lib.iperf_get_test_bind_address(self._test)
+        ).value
         if result:
             self._bind_address = result.decode('utf-8')
         else:
@@ -175,8 +180,10 @@ class IPerf3(object):
 
     @bind_address.setter
     def bind_address(self, address):
-        self.lib.iperf_set_test_bind_address(self._test,
-                                             c_char_p(address.encode('utf-8')))
+        self.lib.iperf_set_test_bind_address(
+            self._test,
+            c_char_p(address.encode('utf-8'))
+        )
         self._bind_address = address
 
     @property
@@ -306,6 +313,7 @@ class Client(IPerf3):
         self._port = None
         self._num_streams = None
         self._zerocopy = False
+        self._bandwidth = None
 
     @property
     def server_hostname(self):
@@ -323,8 +331,10 @@ class Client(IPerf3):
 
     @server_hostname.setter
     def server_hostname(self, hostname):
-        self.lib.iperf_set_test_server_hostname(self._test,
-                                                c_char_p(hostname.encode('utf-8')))
+        self.lib.iperf_set_test_server_hostname(
+            self._test,
+            c_char_p(hostname.encode('utf-8'))
+        )
         self._server_hostname = hostname
 
     @property
@@ -337,6 +347,17 @@ class Client(IPerf3):
     def duration(self, duration):
         self.lib.iperf_set_test_duration(self._test, duration)
         self._duration = duration
+
+    @property
+    def bandwidth(self):
+        self._bandwidth = self.lib.iperf_get_test_rate(self._test)
+        return self._bandwidth
+
+    @bandwidth.setter
+    def bandwidth(self, rate):
+        """Target bandwidth in bits/sec"""
+        self.lib.iperf_set_test_rate(self._test, rate)
+        self._bandwidth = rate
 
     @property
     def bulksize(self):
@@ -424,7 +445,10 @@ class Client(IPerf3):
 
         output_to_screen(self._stdout_fd, self._stderr_fd)
 
-        return TestResult(data)
+        if self.json_output:
+            return TestResult(data)
+        else:
+            return None
 
 
 class Server(IPerf3):
@@ -479,16 +503,23 @@ class Server(IPerf3):
 
             data_queue.put(data)
 
-        data_queue = Queue()
+        if self.json_output:
+            data_queue = Queue()
 
-        t = threading.Thread(target=_run_in_thread, args=[self, data_queue])
-        t.daemon = True
+            t = threading.Thread(target=_run_in_thread, args=[self, data_queue])
+            t.daemon = True
 
-        t.start()
-        while t.is_alive():
-            t.join(.1)
+            t.start()
+            while t.is_alive():
+                t.join(.1)
 
-        return TestResult(data_queue.get())
+            return TestResult(data_queue.get())
+        else:
+            # setting json_output to False will output test to screen only
+            self.lib.iperf_run_server(self._test)
+            self.lib.iperf_reset_test(self._test)
+
+            return None
 
 
 class TestResult(object):
@@ -497,7 +528,7 @@ class TestResult(object):
     :param text: The raw result from libiperf as text
     :param json: The raw result from libiperf asjson/dict
     :param error: Error captured during test, None if all ok
-    
+
     :param time: Start time
     :param timesecs: Start time in seconds
 
