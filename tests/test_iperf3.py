@@ -8,7 +8,7 @@ class TestPyPerf:
 
     def test_unavailable_library(self):
         with pytest.raises(OSError):
-            iperf3.Client(lib_name='bla')
+            client = iperf3.Client(lib_name='bla')
 
     def test_init_client(self):
         client = iperf3.Client()
@@ -72,7 +72,7 @@ class TestPyPerf:
     def test_server_hostname_empty(self):
         client = iperf3.Client()
         client.server_hostname = ''
-        assert not client.server_hostname
+        assert client.server_hostname == None
 
     def test_server_hostname(self):
         client = iperf3.Server()
@@ -223,9 +223,9 @@ class TestPyPerf:
         to generate an error"""
         server = iperf3.Server()
         server.bind_address = '127.0.0.1'
-        server.port = 5205
+        server.port = 5201
 
-        server2 = subprocess.Popen(["iperf3", "-s 5205"])
+        server2 = subprocess.Popen(["iperf3", "-s"])
         sleep(.3)  # give the server some time to start
 
         response = server.run()
@@ -236,11 +236,11 @@ class TestPyPerf:
     def test_server_run(self):
         server = iperf3.Server()
         server.bind_address = '127.0.0.1'
-        server.port = 5206
+        server.port = 5205
 
         # Launching the client with a sleep timer to give our server some time to start
         client = subprocess.Popen(
-            'sleep .5 && iperf3 -c 127.0.0.1 5206 -t 1',
+            'sleep .5 && iperf3 -c 127.0.0.1 -p 5205 -t 1',
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -250,18 +250,18 @@ class TestPyPerf:
 
         assert not response.error
         assert response.local_host == '127.0.0.1'
-        assert response.local_port == 5206
+        assert response.local_port == 5205
         assert response.type == 'server'
 
     def test_server_run_output_to_screen(self):
         server = iperf3.Server()
         server.bind_address = '127.0.0.1'
-        server.port = 5207
+        server.port = 5206
         server.json_output = False
 
         # Launching the client with a sleep timer to give our server some time to start
         client = subprocess.Popen(
-            'sleep .5 && iperf3 -c 127.0.0.1 5207 -t 1',
+            'sleep .5 && iperf3 -c 127.0.0.1 -p 5206 -t 1',
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -275,6 +275,22 @@ class TestPyPerf:
         """Test if we print iperf3 test output to screen when json_output = False."""
         client = iperf3.Client()
         client.server_hostname = '127.0.0.1'
+        client.port = 5207
+        client.duration = 1
+        client.json_output = False
+
+        server = subprocess.Popen(["iperf3", "-s", "-p", "5207"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response == None
+
+    def test_client_succesful_run_udp_output_to_screen(self):
+        """Test if we print iperf3 test output to screen when json_output = False."""
+        client = iperf3.Client()
+        client.protocol = 'udp'
+        client.server_hostname = '127.0.0.1'
         client.port = 5208
         client.duration = 1
         client.json_output = False
@@ -284,20 +300,4 @@ class TestPyPerf:
         response = client.run()
         server.kill()
 
-        assert not response
-
-    def test_client_succesful_run_udp_output_to_screen(self):
-        """Test if we print iperf3 test output to screen when json_output = False."""
-        client = iperf3.Client()
-        client.protocol = 'udp'
-        client.server_hostname = '127.0.0.1'
-        client.port = 5209
-        client.duration = 1
-        client.json_output = False
-
-        server = subprocess.Popen(["iperf3", "-s", "-p", "5209"])
-        sleep(.3)  # give the server some time to start
-        response = client.run()
-        server.kill()
-
-        assert not response
+        assert response == None
