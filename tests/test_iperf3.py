@@ -157,7 +157,7 @@ class TestPyPerf:
         client.port = 5201
         client.duration = 1
         response = client.run()
-        assert response.error == "unable to connect to server: Connection refused"
+        assert "unable to connect to server" in response.error
 
     def test_client_succesful_run(self):
         client = iperf3.Client()

@@ -31,7 +31,7 @@ of iperf3 installation.
 
 **note** The libiperf API added a feature to programmatically retrieve the json output from the library. This
 enables us to retrieve the results without having to scrape the output from stdout. Effectively this means
-that if you want to redirect your script's stdout/stderr to something else you need at least iperf3 version 3.1.?.
+that if you want to redirect your script's stdout/stderr to something else you need at least iperf3 version 3.1
 
 - Install from source (preferred)
 

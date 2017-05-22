@@ -479,18 +479,23 @@ class Client(IPerf3):
         if self.json_output:
             output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
-            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
-            # data = read_pipe(self._pipe_out)
-            data = c_char_p(
-                self.lib.iperf_get_test_json_output_string(self._test)
-            ).value
+            if not self.iperf_version.startswith('iperf 3.1'):
+                data = read_pipe(self._pipe_out)
+                if data.startswith('Control connection'):
+                    data = '{' + data.split('{', 1)[1] 
+            else:
+                data = c_char_p(
+                    self.lib.iperf_get_test_json_output_string(self._test)
+		).value
+                if data:
+                    data = data.decode('utf-8')
+
+            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
             if not data or error:
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
-            else:
-                data = data.decode('utf-8')
-
+    
             return TestResult(data)
 
 
