@@ -32,7 +32,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -477,20 +477,21 @@ class Client(IPerf3):
         """
 
         if self.json_output:
-            output_to_pipe(self._pipe_in)
-
+            output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
+            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
-            if error:
+            # data = read_pipe(self._pipe_out)
+            data = c_char_p(
+                self.lib.iperf_get_test_json_output_string(self._test)
+            ).value
+
+            if not data or error:
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
             else:
-                data = read_pipe(self._pipe_out)
-
-            output_to_screen(self._stdout_fd, self._stderr_fd)
+                data = data.decode('utf-8')
 
             return TestResult(data)
-        else:
-            return None
 
 
 class Server(IPerf3):
@@ -527,9 +528,9 @@ class Server(IPerf3):
 
             :param data_queue: thread-safe queue
             """
-            output_to_pipe(self._pipe_in)
-
-            self.lib.iperf_run_server(self._test)
+            output_to_pipe(self._pipe_in)  # disable stdout
+            error = self.lib.iperf_run_server(self._test)
+            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
             # TODO json_output_string not available on earlier iperf3 builds
             # have to build in a version check using self.iperf_version
@@ -537,12 +538,10 @@ class Server(IPerf3):
             # data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
             data = read_pipe(self._pipe_out)
 
-            if not data:
+            if not data or error:
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
 
-            output_to_screen(self._stdout_fd, self._stderr_fd)
             self.lib.iperf_reset_test(self._test)
-
             data_queue.put(data)
 
         if self.json_output:

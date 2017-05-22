@@ -29,13 +29,17 @@ is preferred.
 **note** The libiperf API was only introduced in 3.0.6 so make sure you have an updated version
 of iperf3 installation.
 
+**note** The libiperf API added a feature to programmatically retrieve the json output from the library. This
+enables us to retrieve the results without having to scrape the output from stdout. Effectively this means
+that if you want to redirect your script's stdout/stderr to something else you need at least iperf3 version 3.1.?.
+
 - Install from source (preferred)
 
 .. code:: bash
 
     wget http://downloads.es.net/pub/iperf/iperf-3-current.tar.gz
     tar xvf iperf-3-current.tar.gz
-    cd iperf-3.1.3/                # Or whatever the latest version is
+    cd iperf-3.1.6/                # Or whatever the latest version is
     ./configure && make && sudo make install
 
 - Ubuntu:
