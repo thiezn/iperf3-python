@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.5 (2017-05-22)
+++++++++++++++++++
+- iperf3.Client() now allows redirection of stdout (iperf3 version => 3.1 required)
+
 0.1.4 (2017-05-15)
 ++++++++++++++++++
 - Fixed server json_output=False feature
