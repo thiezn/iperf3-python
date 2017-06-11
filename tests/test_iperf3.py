@@ -145,7 +145,8 @@ class TestPyPerf:
 
     def test_get_last_error(self):
         client = iperf3.Client()
-        assert client._errno == 0
+        print(client._error_to_string(client._errno))
+        assert client._errno == 111
 
     def test_error_to_string(self):
         client = iperf3.Client()
