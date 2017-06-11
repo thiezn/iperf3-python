@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.6 (2017-06-11)
+++++++++++++++++++
+- iperf3.__del__ now properly closing FD and pipes (Thanks to @p0intR)
+
 0.1.5 (2017-05-22)
 ++++++++++++++++++
 - iperf3.Client() now allows redirection of stdout (iperf3 version => 3.1 required)
