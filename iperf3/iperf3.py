@@ -117,10 +117,23 @@ class IPerf3(object):
         self.json_output = True
         self.verbose = verbose
 
-
     def __del__(self):
         """Cleanup the test after the :class:`IPerf3` class is terminated"""
+        os.close(self._stdout_fd)
+        os.close(self._stderr_fd)
+        os.close(self._pipe_out)
+        os.close(self._pipe_in)
+
         try:
+            # In the current version of libiperf, the control socket isn't closed on iperf_client_end()
+            # See proposed solution in pull request: https://github.com/esnet/iperf/pull/597
+            #
+            # Workaround for testing, don't ever do this..:
+            #
+            # sck=self.lib.iperf_get_control_socket(self._test)
+            # os.close(sck)
+
+            self.lib.iperf_client_end(self._test)
             self.lib.iperf_free_test(self._test)
         except AttributeError:
             # self.lib doesn't exist, likely because iperf3 wasn't installed or
