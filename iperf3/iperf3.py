@@ -32,7 +32,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -700,15 +700,16 @@ class TestResult(object):
                 self.received_bytes = self.json['end']['sum_received']['bytes']
                 self.received_bps = self.json['end']['sum_received']['bits_per_second']
 
-                self.sent_kbps = self.sent_bps / 1024           # Kilobits per second
-                self.sent_Mbps = self.sent_kbps / 1024          # Megabits per second
-                self.sent_kB_s = self.sent_kbps / 8             # kiloBytes per second
-                self.sent_MB_s = self.sent_Mbps / 8             # MegaBytes per second
+                #  Bits are measured in 10**3 terms, Bytes are measured in 2**10 terms
+                self.sent_kbps = self.sent_bps / 1000           # Kilobits per second
+                self.sent_Mbps = self.sent_kbps / 1000          # Megabits per second
+                self.sent_kB_s = self.sent_bps / (8 * 1024)     # kiloBytes per second
+                self.sent_MB_s = self.sent_kB_s / 1024          # MegaBytes per second
 
-                self.received_kbps = self.received_bps / 1024   # Kilobits per second
-                self.received_Mbps = self.received_kbps / 1024  # Megabits per second
-                self.received_kB_s = self.received_kbps / 8     # kiloBytes per second
-                self.received_MB_s = self.received_Mbps / 8     # MegaBytes per second
+                self.received_kbps = self.received_bps / 1000   # Kilobits per second
+                self.received_Mbps = self.received_kbps / 1000  # Megabits per second
+                self.received_kB_s = self.received_bps / (8* 1024)     # kiloBytes per second
+                self.received_MB_s = self.received_kB_s / 1024     # MegaBytes per second
 
                 # retransmits only returned from client
                 self.retransmits = self.json['end']['sum_sent'].get('retransmits', None)
@@ -718,10 +719,10 @@ class TestResult(object):
                 self.bytes = self.json['end']['sum']['bytes']
                 self.bps = self.json['end']['sum']['bits_per_second']
                 self.jitter_ms = self.json['end']['sum']['jitter_ms']
-                self.kbps = self.bps / 1024
-                self.Mbps = self.kbps / 1024
-                self.kB_s = self.kbps / 8
-                self.MB_s = self.Mbps / 8
+                self.kbps = self.bps / 1000
+                self.Mbps = self.kbps / 1000
+                self.kB_s = self.kbps / (8 * 1024)
+                self.MB_s = self.Mbps / 1024
                 self.packets = self.json['end']['sum']['packets']
                 self.lost_packets = self.json['end']['sum']['lost_packets']
                 self.lost_percent = self.json['end']['sum']['lost_percent']
