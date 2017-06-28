@@ -3,6 +3,8 @@ import pytest
 import subprocess
 from time import sleep
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 class TestPyPerf:
 
@@ -304,7 +306,6 @@ class TestPyPerf:
         assert response == None
 
     def test_result(self):
-        from math import isclose
         with open('results.json') as f:
             json = f.read()
 
