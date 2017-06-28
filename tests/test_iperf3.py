@@ -1,3 +1,4 @@
+import os
 import iperf3
 import pytest
 import subprocess
@@ -306,7 +307,8 @@ class TestPyPerf:
         assert response == None
 
     def test_result(self):
-        with open('results.json') as f:
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, 'results.json')) as f:
             json = f.read()
 
         result = iperf3.TestResult(json)
