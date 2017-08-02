@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.7 (2017-08-02)
+++++++++++++++++++
+- Fixed Mbps vs MB_s calculations (Thanks to @rustyhowell)
+
 0.1.6 (2017-06-11)
 ++++++++++++++++++
 - iperf3.__del__ now properly closing FD and pipes (Thanks to @p0intR)
