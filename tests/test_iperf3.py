@@ -1,8 +1,11 @@
+import os
 import iperf3
 import pytest
 import subprocess
 from time import sleep
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 class TestPyPerf:
 
@@ -302,3 +305,23 @@ class TestPyPerf:
         server.kill()
 
         assert response == None
+
+    def test_result(self):
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(dirname, 'results.json')) as f:
+            json = f.read()
+
+        result = iperf3.TestResult(json)
+        assert result.sent_bps  == 935992000
+        assert result.sent_kbps == 935992
+        assert result.sent_Mbps == 935.992
+        assert isclose(result.sent_kB_s, 114256.836, rel_tol=0.01)
+        assert isclose(result.sent_MB_s, 111.579, rel_tol=0.01)
+
+        assert result.received_bps  == 934268000
+        assert result.received_kbps  == 934268
+        assert result.received_Mbps  == 934.268
+
+        assert isclose(result.received_kB_s, 114046.387, rel_tol=0.01)
+        assert isclose(result.received_MB_s, 111.373, rel_tol=0.01)
+
