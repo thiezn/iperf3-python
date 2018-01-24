@@ -39,7 +39,7 @@ that if you want to redirect your script's stdout/stderr to something else you n
 
     wget http://downloads.es.net/pub/iperf/iperf-3-current.tar.gz
     tar xvf iperf-3-current.tar.gz
-    cd iperf-3.1.6/                # Or whatever the latest version is
+    cd iperf-3.3/                # Or whatever the latest version is
     ./configure && make && sudo make install
 
 - Ubuntu:
@@ -124,6 +124,12 @@ Testing
   - 3.1.1
   - 3.1.2
   - 3.1.3
+  - 3.1.4
+  - 3.1.5
+  - 3.1.6
+  - 3.1.7
+  - 3.2
+  - 3.3
 
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:

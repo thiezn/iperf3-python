@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """
 Python wrapper for the iperf3 libiperf.so.0 library. The module consists of two
 classes, :class:`Client` and :class:`Server`, that inherit from the base class
@@ -7,19 +6,19 @@ classes, :class:`Client` and :class:`Server`, that inherit from the base class
 interact with the iperf3 utility.
 
 At the moment the module redirects stdout and stderr to a pipe and returns the
-received data back after each ``client.run()`` or ``server.run()`` call. In later
-releases there will be an option to toggle this on or off.
+received data back after each ``client.run()`` or ``server.run()`` call. In
+later releases there will be an option to toggle this on or off.
 
-A user should never have to utilise the :class:`IPerf3` class directly, this class
-provides common settings for the :class:`Client` and :class:`Server` classes.
+A user should never have to utilise the :class:`IPerf3` class directly, this
+class provides common settings for the :class:`Client` and :class:`Server`
+classes.
 
 To get started quickly see the :ref:`examples` page.
 
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
-from ctypes import cdll, c_char_p, c_int, c_char
-from ctypes.util import find_library
+from ctypes import cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
 import os
 import select
 import json
@@ -32,7 +31,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -101,7 +100,90 @@ class IPerf3(object):
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
-            raise OSError('Could not find shared library {0}. Is iperf3 installed?'.format(lib_name))
+            raise OSError(
+                "Couldn't find shared library {}, is iperf3 installed?".format(
+                    lib_name
+                )
+            )
+
+        # Set the appropriate C types.
+        self.lib.iperf_client_end.restype = c_int
+        self.lib.iperf_client_end.argtypes = (c_void_p,)
+        self.lib.iperf_free_test.restxpe = None
+        self.lib.iperf_free_test.argtypes = (c_void_p,)
+        self.lib.iperf_new_test.restype = c_void_p
+        self.lib.iperf_new_test.argtypes = None
+        self.lib.iperf_defaults.restype = c_int
+        self.lib.iperf_defaults.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_role.restype = c_char
+        self.lib.iperf_get_test_role.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_role.restype = None
+        self.lib.iperf_set_test_role.argtypes = (c_void_p, c_char,)
+        self.lib.iperf_get_test_bind_address.restype = c_char_p
+        self.lib.iperf_get_test_bind_address.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_bind_address.restype = None
+        self.lib.iperf_set_test_bind_address.argtypes = (c_void_p, c_char_p,)
+        self.lib.iperf_get_test_server_port.restype = c_int
+        self.lib.iperf_get_test_server_port.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_server_port.restype = None
+        self.lib.iperf_set_test_server_port.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_json_output.restype = c_int
+        self.lib.iperf_get_test_json_output.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_json_output.restype = None
+        self.lib.iperf_set_test_json_output.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_verbose.restype = c_int
+        self.lib.iperf_get_verbose.argtypes = (c_void_p,)
+        self.lib.iperf_set_verbose.restype = None
+        self.lib.iperf_set_verbose.argtypes = (c_void_p, c_int)
+        self.lib.iperf_strerror.restype = c_char_p
+        self.lib.iperf_strerror.argtypes = (c_int,)
+        self.lib.iperf_get_test_server_hostname.restype = c_char_p
+        self.lib.iperf_get_test_server_hostname.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_server_hostname.restype = None
+        self.lib.iperf_set_test_server_hostname.argtypes = (
+            c_void_p, c_char_p,
+        )
+        self.lib.iperf_get_test_protocol_id.restype = c_int
+        self.lib.iperf_get_test_protocol_id.argtypes = (c_void_p,)
+        self.lib.set_protocol.restype = c_int
+        self.lib.set_protocol.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_duration.restype = c_int
+        self.lib.iperf_get_test_duration.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_duration.restype = None
+        self.lib.iperf_set_test_duration.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_rate.restype = c_uint64
+        self.lib.iperf_get_test_rate.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_rate.restype = None
+        self.lib.iperf_set_test_rate.argtypes = (c_void_p, c_uint64,)
+        self.lib.iperf_get_test_blksize.restype = c_int
+        self.lib.iperf_get_test_blksize.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_blksize.restype = None
+        self.lib.iperf_set_test_blksize.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_num_streams.restype = c_int
+        self.lib.iperf_get_test_num_streams.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_num_streams.restype = None
+        self.lib.iperf_set_test_num_streams.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_has_zerocopy.restype = c_int
+        self.lib.iperf_has_zerocopy.argtypes = None
+        self.lib.iperf_set_test_zerocopy.restype = None
+        self.lib.iperf_set_test_zerocopy.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_reverse.restype = c_int
+        self.lib.iperf_get_test_reverse.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_reverse.restype = None
+        self.lib.iperf_set_test_reverse.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_run_client.restype = c_int
+        self.lib.iperf_run_client.argtypes = (c_void_p,)
+        self.lib.iperf_run_server.restype = c_int
+        self.lib.iperf_run_server.argtypes = (c_void_p,)
+        self.lib.iperf_reset_test.restype = None
+        self.lib.iperf_reset_test.argtypes = (c_void_p,)
+
+        try:
+            # Only available from iperf v3.1 and onwards
+            self.lib.iperf_get_test_json_output_string.restype = c_char_p
+            self.lib.iperf_get_test_json_output_string.argtypes = (c_void_p,)
+        except AttributeError:
+            pass
 
         # The test C struct iperf_test
         self._test = self._new()
@@ -125,9 +207,9 @@ class IPerf3(object):
         os.close(self._pipe_in)
 
         try:
-            # In the current version of libiperf, the control socket isn't closed on iperf_client_end()
-            # See proposed solution in pull request: https://github.com/esnet/iperf/pull/597
-            #
+            # In the current version of libiperf, the control socket isn't
+            # closed on iperf_client_end(), see proposed pull request:
+            # https://github.com/esnet/iperf/pull/597
             # Workaround for testing, don't ever do this..:
             #
             # sck=self.lib.iperf_get_control_socket(self._test)
@@ -343,7 +425,9 @@ class Client(IPerf3):
 
         :rtype: string
         """
-        result = c_char_p(self.lib.iperf_get_test_server_hostname(self._test)).value
+        result = c_char_p(
+            self.lib.iperf_get_test_server_hostname(self._test)
+        ).value
         if result:
             self._server_hostname = result.decode('utf-8')
         else:
@@ -443,8 +527,8 @@ class Client(IPerf3):
         Use the sendfile() system call for "Zero Copy" mode. This uses much
         less CPU. This is not supported on all systems.
 
-        **Note** there isn't a hook in the libiperf library for getting the current
-        configured value. Relying on zerocopy.setter function
+        **Note** there isn't a hook in the libiperf library for getting the
+        current configured value. Relying on zerocopy.setter function
 
         :rtype: bool
         """
@@ -488,7 +572,6 @@ class Client(IPerf3):
 
         :rtype: instance of :class:`TestResult`
         """
-
         if self.json_output:
             output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
@@ -496,11 +579,11 @@ class Client(IPerf3):
             if not self.iperf_version.startswith('iperf 3.1'):
                 data = read_pipe(self._pipe_out)
                 if data.startswith('Control connection'):
-                    data = '{' + data.split('{', 1)[1] 
+                    data = '{' + data.split('{', 1)[1]
             else:
                 data = c_char_p(
                     self.lib.iperf_get_test_json_output_string(self._test)
-		).value
+                ).value
                 if data:
                     data = data.decode('utf-8')
 
@@ -508,7 +591,7 @@ class Client(IPerf3):
 
             if not data or error:
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
-    
+
             return TestResult(data)
 
 
@@ -553,7 +636,9 @@ class Server(IPerf3):
             # TODO json_output_string not available on earlier iperf3 builds
             # have to build in a version check using self.iperf_version
             # The following line should work on later versions:
-            # data = c_char_p(self.lib.iperf_get_test_json_output_string(self._test)).value
+            # data = c_char_p(
+            #    self.lib.iperf_get_test_json_output_string(self._test)
+            # ).value
             data = read_pipe(self._pipe_out)
 
             if not data or error:
@@ -565,7 +650,9 @@ class Server(IPerf3):
         if self.json_output:
             data_queue = Queue()
 
-            t = threading.Thread(target=_run_in_thread, args=[self, data_queue])
+            t = threading.Thread(
+                target=_run_in_thread, args=[self, data_queue]
+            )
             t.daemon = True
 
             t.start()
@@ -672,13 +759,14 @@ class TestResult(object):
             self.version = self.json['start']['version']
 
             # connection details
-            self.local_host = self.json['start']['connected'][0]['local_host']
-            self.local_port = self.json['start']['connected'][0]['local_port']
-            self.remote_host = self.json['start']['connected'][0]['remote_host']
-            self.remote_port = self.json['start']['connected'][0]['remote_port']
+            connection_details = self.json['start']['connected'][0]
+            self.local_host = connection_details['local_host']
+            self.local_port = connection_details['local_port']
+            self.remote_host = connection_details['remote_host']
+            self.remote_port = connection_details['remote_port']
 
             # test setup
-            self.tcp_mss_default = self.json['start'].get('tcp_mss_default', None)
+            self.tcp_mss_default = self.json['start'].get('tcp_mss_default')
             self.protocol = self.json['start']['test_start']['protocol']
             self.num_streams = self.json['start']['test_start']['num_streams']
             self.bulksize = self.json['start']['test_start']['blksize']
@@ -686,12 +774,13 @@ class TestResult(object):
             self.duration = self.json['start']['test_start']['duration']
 
             # system performance
-            self.local_cpu_total = self.json['end']['cpu_utilization_percent']['host_total']
-            self.local_cpu_user = self.json['end']['cpu_utilization_percent']['host_user']
-            self.local_cpu_system = self.json['end']['cpu_utilization_percent']['host_system']
-            self.remote_cpu_total = self.json['end']['cpu_utilization_percent']['remote_total']
-            self.remote_cpu_user = self.json['end']['cpu_utilization_percent']['remote_user']
-            self.remote_cpu_system = self.json['end']['cpu_utilization_percent']['remote_system']
+            cpu_utilization_perc = self.json['end']['cpu_utilization_percent']
+            self.local_cpu_total = cpu_utilization_perc['host_total']
+            self.local_cpu_user = cpu_utilization_perc['host_user']
+            self.local_cpu_system = cpu_utilization_perc['host_system']
+            self.remote_cpu_total = cpu_utilization_perc['remote_total']
+            self.remote_cpu_user = cpu_utilization_perc['remote_user']
+            self.remote_cpu_system = cpu_utilization_perc['remote_system']
 
             # TCP specific test results
             if self.protocol == 'TCP':
@@ -712,7 +801,7 @@ class TestResult(object):
                 self.received_MB_s = self.received_kB_s / 1024     # MegaBytes per second
 
                 # retransmits only returned from client
-                self.retransmits = self.json['end']['sum_sent'].get('retransmits', None)
+                self.retransmits = self.json['end']['sum_sent'].get('retransmits')
 
             # UDP specific test results
             elif self.protocol == 'UDP':

@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.8 (2018-01-24)
+++++++++++++++++++
+- Fixed segmentation fault on several Linux distro's (Thanks to @illu89)
+- Added Travis testing against latest iperf3 releases (3.3)
+
 0.1.7 (2017-08-02)
 ++++++++++++++++++
 - Fixed Mbps vs MB_s calculations (Thanks to @rustyhowell)
