@@ -409,7 +409,7 @@ class Client(IPerf3):
         super(Client, self).__init__(role='c', *args, **kwargs)
 
         # Internal variables
-        self._bulksize = None
+        self._blksize = None
         self._server_hostname = None
         self._port = None
         self._num_streams = None
@@ -466,8 +466,8 @@ class Client(IPerf3):
         elif protocol == 'udp':
             self.lib.set_protocol(self._test, int(SOCK_DGRAM))
 
-            if self.bulksize > MAX_UDP_BULKSIZE:
-                self.bulksize = MAX_UDP_BULKSIZE
+            if self.blksize > MAX_UDP_BULKSIZE:
+                self.blksize = MAX_UDP_BULKSIZE
 
         self._protocol = protocol
 
@@ -494,20 +494,37 @@ class Client(IPerf3):
         self._bandwidth = bandwidth
 
     @property
-    def bulksize(self):
-        """The test bulksize."""
-        self._bulksize = self.lib.iperf_get_test_blksize(self._test)
-        return self._bulksize
+    def blksize(self):
+        """The test blksize."""
+        self._blksize = self.lib.iperf_get_test_blksize(self._test)
+        return self._blksize
 
-    @bulksize.setter
-    def bulksize(self, bulksize):
+    @blksize.setter
+    def blksize(self, bulksize):
         # iperf version < 3.1.3 has some weird bugs when bulksize is
         # larger than MAX_UDP_BULKSIZE
         if self.protocol == 'udp' and bulksize > MAX_UDP_BULKSIZE:
             bulksize = MAX_UDP_BULKSIZE
 
         self.lib.iperf_set_test_blksize(self._test, bulksize)
-        self._bulksize = bulksize
+        self._blksize = bulksize
+
+    @property
+    def bulksize(self):
+        """The test bulksize.
+
+        Deprecated argument, use blksize instead to ensure consistency
+        with iperf3 C libary
+        """
+        # Keeping bulksize argument for backwards compatibility with
+        # iperf3-python < 0.1.7
+        return self.blksize
+
+    @bulksize.setter
+    def bulksize(self, bulksize):
+        # Keeping bulksize argument for backwards compatibility with
+        # iperf3-python < 0.1.7
+        self.blksize = bulksize
 
     @property
     def num_streams(self):
@@ -689,7 +706,7 @@ class TestResult(object):
     :param reverse: Test ran in reverse direction
     :param protocol: 'TCP' or 'UDP'
     :param num_streams: Number of test streams
-    :param bulksize:
+    :param blksize:
     :param omit:
     :param duration: Test duration in seconds
 
@@ -769,7 +786,7 @@ class TestResult(object):
             self.tcp_mss_default = self.json['start'].get('tcp_mss_default')
             self.protocol = self.json['start']['test_start']['protocol']
             self.num_streams = self.json['start']['test_start']['num_streams']
-            self.bulksize = self.json['start']['test_start']['blksize']
+            self.blksize = self.json['start']['test_start']['blksize']
             self.omit = self.json['start']['test_start']['omit']
             self.duration = self.json['start']['test_start']['duration']
 

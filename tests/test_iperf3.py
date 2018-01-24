@@ -44,14 +44,14 @@ class TestPyPerf:
         client.protocol = 'tcp'
         assert client.protocol == 'tcp'
 
-    def test_udp_bulksize_limit(self):
-        """Ensure the bulksize can't exceed MAX_UDP_BULKSIZE"""
+    def test_udp_blksize_limit(self):
+        """Ensure the blksize can't exceed MAX_UDP_BULKSIZE"""
         MAX_UDP_BULKSIZE = (65535 - 8 - 20)
         client = iperf3.Client()
         client.protocol = 'udp'
 
-        client.bulksize = MAX_UDP_BULKSIZE + 10
-        assert client.bulksize == MAX_UDP_BULKSIZE
+        client.blksize = MAX_UDP_BULKSIZE + 10
+        assert client.blksize == MAX_UDP_BULKSIZE
 
     def test_bind_address_empty(self):
         """Test if we bind to any/all address when empty bind_address is
@@ -91,10 +91,10 @@ class TestPyPerf:
         client = iperf3.Client()
         assert 'iperf' in client.iperf_version
 
-    def test_bulksize(self):
+    def test_blksize(self):
         client = iperf3.Client()
-        client.bulksize = 666
-        assert client.bulksize == 666
+        client.blksize = 666
+        assert client.blksize == 666
 
     def test_bandwidth(self):
         client = iperf3.Client()
@@ -251,10 +251,13 @@ class TestPyPerf:
         )
         response = server.run()
 
-        assert not response.error
-        assert response.local_host == '127.0.0.1'
-        assert response.local_port == 5205
-        assert response.type == 'server'
+        if server.iperf_version.startswith('iperf 3.0') or server.iperf_version.startswith('iperf 3.1'):
+            assert not response.error
+            assert response.local_host == '127.0.0.1'
+            assert response.local_port == 5205
+            assert response.type == 'server'
+        else:
+            assert response.error == 'the client has unexpectedly closed the connection'
 
     def test_server_run_output_to_screen(self):
         server = iperf3.Server()

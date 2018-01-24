@@ -7,6 +7,7 @@ Release History
 ++++++++++++++++++
 - Fixed segmentation fault on several Linux distro's (Thanks to @illu89)
 - Added Travis testing against latest iperf3 releases (3.3)
+- Renamed bulksize argument to blksize to keep naming in line with iperf3 C library. bulksize argument still available for backwards compatibility
 
 0.1.7 (2017-08-02)
 ++++++++++++++++++
