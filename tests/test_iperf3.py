@@ -250,14 +250,8 @@ class TestPyPerf:
             stderr=subprocess.PIPE
         )
         response = server.run()
-        client.kill()
 
-        # iperf3 version >= 3.2 returns error on client kill
-        if server.iperf_version.startswith('iperf 3.1'):
-            assert not response.error
-        else:
-            assert response.error == 'the client has unexpectedly closed the connection'
-
+        assert not response.error
         assert response.local_host == '127.0.0.1'
         assert response.local_port == 5205
         assert response.type == 'server'
