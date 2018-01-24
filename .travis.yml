@@ -45,7 +45,7 @@ before_install:
 
     # Install iperf version selected above
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xvf *.tar.gz ;fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd 3*/ ;fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd iperf-*/ ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./bootstrap.sh ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure && make && sudo make install ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .. ;fi
