@@ -88,15 +88,16 @@ class IPerf3(object):
     """
     def __init__(self,
                  role,
-                 verbose=True,
-                 lib_name='libiperf.so.0'):
+                 verbose=True):
         """Initialise the iperf shared library
 
         :param role: 'c' = client; 's' = server
         :param verbose: enable verbose output
-        :param lib_name: The libiperf name providing the API to iperf3
         """
-        # TODO use find_library to find the best library
+        lib_name = util.find_library('libiperf')
+        if lib_name is None:
+            lib_name = 'libiperf.so.0'
+
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
