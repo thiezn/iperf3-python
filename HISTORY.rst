@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.9 (2018-02-22)
+++++++++++++++++++
+- Use find_library to load libiperf (Thanks to @Austinpayne). This should allow iperf3 lib to run on Mac OS X.
+
 0.1.8 (2018-01-24)
 ++++++++++++++++++
 - Fixed segmentation fault on several Linux distro's (Thanks to @illu89)
