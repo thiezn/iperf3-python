@@ -9,10 +9,6 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
 
 class TestPyPerf:
 
-    def test_unavailable_library(self):
-        with pytest.raises(OSError):
-            client = iperf3.Client(lib_name='bla')
-
     def test_init_client(self):
         client = iperf3.Client()
         assert client._test

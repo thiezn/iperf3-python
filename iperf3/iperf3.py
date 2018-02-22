@@ -18,7 +18,7 @@ To get started quickly see the :ref:`examples` page.
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
-from ctypes import cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
+from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
 import os
 import select
 import json
@@ -31,7 +31,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -88,15 +88,16 @@ class IPerf3(object):
     """
     def __init__(self,
                  role,
-                 verbose=True,
-                 lib_name='libiperf.so.0'):
+                 verbose=True):
         """Initialise the iperf shared library
 
         :param role: 'c' = client; 's' = server
         :param verbose: enable verbose output
-        :param lib_name: The libiperf name providing the API to iperf3
         """
-        # TODO use find_library to find the best library
+        lib_name = util.find_library('libiperf')
+        if lib_name is None:
+            lib_name = 'libiperf.so.0'
+
         try:
             self.lib = cdll.LoadLibrary(lib_name)
         except OSError:
@@ -801,24 +802,33 @@ class TestResult(object):
 
             # TCP specific test results
             if self.protocol == 'TCP':
-                self.sent_bytes = self.json['end']['sum_sent']['bytes']
-                self.sent_bps = self.json['end']['sum_sent']['bits_per_second']
-                self.received_bytes = self.json['end']['sum_received']['bytes']
-                self.received_bps = self.json['end']['sum_received']['bits_per_second']
+                sent_json = self.json['end']['sum_sent']
+                self.sent_bytes = sent_json['bytes']
+                self.sent_bps = sent_json['bits_per_second']
 
-                #  Bits are measured in 10**3 terms, Bytes are measured in 2**10 terms
-                self.sent_kbps = self.sent_bps / 1000           # Kilobits per second
-                self.sent_Mbps = self.sent_kbps / 1000          # Megabits per second
-                self.sent_kB_s = self.sent_bps / (8 * 1024)     # kiloBytes per second
-                self.sent_MB_s = self.sent_kB_s / 1024          # MegaBytes per second
+                recv_json = self.json['end']['sum_received']
+                self.received_bytes = recv_json['bytes']
+                self.received_bps = recv_json['bits_per_second']
 
-                self.received_kbps = self.received_bps / 1000   # Kilobits per second
-                self.received_Mbps = self.received_kbps / 1000  # Megabits per second
-                self.received_kB_s = self.received_bps / (8* 1024)     # kiloBytes per second
-                self.received_MB_s = self.received_kB_s / 1024     # MegaBytes per second
+                # Bits are measured in 10**3 terms
+                # Bytes are measured in 2**10 terms
+                # kbps = Kilobits per second
+                # Mbps = Megabits per second
+                # kB_s = kiloBytes per second
+                # MB_s = MegaBytes per second
+
+                self.sent_kbps = self.sent_bps / 1000
+                self.sent_Mbps = self.sent_kbps / 1000
+                self.sent_kB_s = self.sent_bps / (8 * 1024)
+                self.sent_MB_s = self.sent_kB_s / 1024
+
+                self.received_kbps = self.received_bps / 1000
+                self.received_Mbps = self.received_kbps / 1000
+                self.received_kB_s = self.received_bps / (8 * 1024)
+                self.received_MB_s = self.received_kB_s / 1024
 
                 # retransmits only returned from client
-                self.retransmits = self.json['end']['sum_sent'].get('retransmits')
+                self.retransmits = sent_json.get('retransmits')
 
             # UDP specific test results
             elif self.protocol == 'UDP':
