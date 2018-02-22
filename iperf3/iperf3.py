@@ -18,7 +18,7 @@ To get started quickly see the :ref:`examples` page.
 .. moduleauthor:: Mathijs Mortimer <mathijs@mortimer.nl>
 """
 
-from ctypes import cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
+from ctypes import util, cdll, c_char_p, c_int, c_char, c_void_p, c_uint64
 import os
 import select
 import json
