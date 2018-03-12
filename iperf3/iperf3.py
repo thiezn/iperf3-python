@@ -764,7 +764,7 @@ class TestResult(object):
         self.json = json.loads(result)
 
         if 'error' in self.json:
-            self.error = self.json['error']
+            raise IOError(self.json['error'])
         else:
             self.error = None
 
