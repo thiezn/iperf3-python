@@ -31,7 +31,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -88,15 +88,19 @@ class IPerf3(object):
     """
     def __init__(self,
                  role,
-                 verbose=True):
+                 verbose=True,
+                 lib_name=None):
         """Initialise the iperf shared library
 
         :param role: 'c' = client; 's' = server
         :param verbose: enable verbose output
+        :param lib_name: optional name and path for libiperf.so.0 library
         """
-        lib_name = util.find_library('libiperf')
         if lib_name is None:
-            lib_name = 'libiperf.so.0'
+            lib_name = util.find_library('libiperf')
+            if lib_name is None:
+                # If we still couldn't find it lets try the manual approach
+                lib_name = 'libiperf.so.0'
 
         try:
             self.lib = cdll.LoadLibrary(lib_name)
