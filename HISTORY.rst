@@ -3,6 +3,10 @@
 Release History
 ---------------
 
+0.1.10 (2018-03-28)
++++++++++++++++++++
+- Allow manual set of libiperf library path and name using lib_name kwarg on Iperf3 Class
+
 0.1.9 (2018-02-22)
 ++++++++++++++++++
 - Use find_library to load libiperf (Thanks to @Austinpayne). This should allow iperf3 lib to run on Mac OS X.

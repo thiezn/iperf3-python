@@ -17,6 +17,10 @@ class TestPyPerf:
         server = iperf3.Server()
         assert server._test
 
+    def test_lib_name(self):
+        client = iperf3.Client(lib_name='libiperf.so.0')
+        assert client._test
+
     def test_run_not_implemented(self):
         with pytest.raises(NotImplementedError):
             client = iperf3.IPerf3(role='c')
