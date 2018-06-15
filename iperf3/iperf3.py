@@ -841,8 +841,8 @@ class TestResult(object):
                 self.jitter_ms = self.json['end']['sum']['jitter_ms']
                 self.kbps = self.bps / 1000
                 self.Mbps = self.kbps / 1000
-                self.kB_s = self.kbps / (8 * 1024)
-                self.MB_s = self.Mbps / 1024
+                self.kB_s = self.kbps / 8
+                self.MB_s = self.Mbps / 8
                 self.packets = self.json['end']['sum']['packets']
                 self.lost_packets = self.json['end']['sum']['lost_packets']
                 self.lost_percent = self.json['end']['sum']['lost_percent']
