@@ -508,7 +508,7 @@ class Client(IPerf3):
     def blksize(self, bulksize):
         # iperf version < 3.1.3 has some weird bugs when bulksize is
         # larger than MAX_UDP_BULKSIZE
-        if self.protocol == 'udp' and bulksize > MAX_UDP_BULKSIZE:
+        if self._protocol == 'udp' and bulksize > MAX_UDP_BULKSIZE:
             bulksize = MAX_UDP_BULKSIZE
 
         self.lib.iperf_set_test_blksize(self._test, bulksize)
