@@ -17,6 +17,7 @@ available options for a :class:`Client <iperf3.Client>`
 >>> import iperf3
 
 >>> client = iperf3.Client()
+>>> client.omit = 1
 >>> client.duration = 1
 >>> client.bind_address = '10.0.0.1'
 >>> client.server_hostname = '10.10.10.10'

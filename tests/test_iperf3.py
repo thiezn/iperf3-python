@@ -82,6 +82,11 @@ class TestPyPerf:
         client.server_hostname = '127.0.0.1'
         assert client.server_hostname == '127.0.0.1'
 
+    def test_omit(self):
+        client = iperf3.Client()
+        client.omit = 666
+        assert client.omit == 666
+
     def test_duration(self):
         client = iperf3.Client()
         client.duration = 666

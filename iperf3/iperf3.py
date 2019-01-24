@@ -152,6 +152,10 @@ class IPerf3(object):
         self.lib.iperf_get_test_protocol_id.argtypes = (c_void_p,)
         self.lib.set_protocol.restype = c_int
         self.lib.set_protocol.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_omit.restype = c_int
+        self.lib.iperf_get_test_omit.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_omit.restype = None
+        self.lib.iperf_set_test_omit.argtypes = (c_void_p, c_int,)
         self.lib.iperf_get_test_duration.restype = c_int
         self.lib.iperf_get_test_duration.argtypes = (c_void_p,)
         self.lib.iperf_set_test_duration.restype = None
@@ -419,6 +423,8 @@ class Client(IPerf3):
         self._port = None
         self._num_streams = None
         self._zerocopy = False
+        self._omit = None
+        self._duration = None
         self._bandwidth = None
         self._protocol = None
 
@@ -475,6 +481,17 @@ class Client(IPerf3):
                 self.blksize = MAX_UDP_BULKSIZE
 
         self._protocol = protocol
+
+    @property
+    def omit(self):
+        """The test startup duration to omit in seconds."""
+        self._omit = self.lib.iperf_get_test_omit(self._test)
+        return self._omit
+
+    @omit.setter
+    def omit(self, omit):
+        self.lib.iperf_set_test_omit(self._test, omit)
+        self._omit = omit
 
     @property
     def duration(self):
@@ -712,8 +729,8 @@ class TestResult(object):
     :param protocol: 'TCP' or 'UDP'
     :param num_streams: Number of test streams
     :param blksize:
-    :param omit:
-    :param duration: Test duration in seconds
+    :param omit: Test duration to omit in the beginning in seconds
+    :param duration: Test duration (following omit duration) in seconds
 
     :param local_cpu_total: The local total CPU load
     :param local_cpu_user: The local user CPU load
