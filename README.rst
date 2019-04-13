@@ -111,7 +111,7 @@ External Dependencies
 Testing
 -------
 
-- Tested against the following iperf3 versions on Unix (ubuntu Trusty):
+- Tested against the following iperf3 versions on Linux:
 
   - 3.0.6
   - 3.0.7
@@ -130,6 +130,7 @@ Testing
   - 3.1.7
   - 3.2
   - 3.3
+  - 3.6
 
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__
 - Tested against the following Python versions:
