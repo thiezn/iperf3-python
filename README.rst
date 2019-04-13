@@ -130,6 +130,8 @@ Testing
   - 3.1.7
   - 3.2
   - 3.3
+  - 3.4
+  - 3.5
   - 3.6
 
 - Test coverage reporting through `coveralls.io <https://coveralls.io/>`__

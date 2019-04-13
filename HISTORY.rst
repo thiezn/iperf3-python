@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.11 (2019-04-13)
+++++++++++++++++++
+- Fixed kB_s and MB_s in UDP test results (Thanks @gleichda)
+- Added omit option (Thanks @ChristofKaufmann)
+
 0.1.10 (2018-03-28)
 +++++++++++++++++++
 - Allow manual set of libiperf library path and name using lib_name kwarg on Iperf3 Class

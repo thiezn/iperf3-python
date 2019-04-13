@@ -23,6 +23,9 @@ env:
   - IPERF_VERSION="3.1.7"
   - IPERF_VERSION="3.2"
   - IPERF_VERSION="3.3"
+  - IPERF_VERSION="3.4"
+  - IPERF_VERSION="3.5"
+  - IPERF_VERSION="3.6"
 before_install:
     # Download the various available iperf3 sources
     - if [[ "$IPERF_VERSION" == "3.0.6" ]]; then wget https://github.com/esnet/iperf/archive/3.0.6.tar.gz ;fi
@@ -42,6 +45,9 @@ before_install:
     - if [[ "$IPERF_VERSION" == "3.1.7" ]]; then wget https://github.com/esnet/iperf/archive/3.1.7.tar.gz ;fi
     - if [[ "$IPERF_VERSION" == "3.2" ]]; then wget https://github.com/esnet/iperf/archive/3.2.tar.gz ;fi
     - if [[ "$IPERF_VERSION" == "3.3" ]]; then wget https://github.com/esnet/iperf/archive/3.3.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.4" ]]; then wget https://github.com/esnet/iperf/archive/3.4.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.5" ]]; then wget https://github.com/esnet/iperf/archive/3.5.tar.gz ;fi
+    - if [[ "$IPERF_VERSION" == "3.6" ]]; then wget https://github.com/esnet/iperf/archive/3.6.tar.gz ;fi
 
     # Install iperf version selected above
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then tar xvf *.tar.gz ;fi
@@ -50,11 +56,11 @@ before_install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./configure && make && sudo make install ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .. ;fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export LD_LIBRARY_PATH=/usr/local/lib ;fi
-install: 
+install:
     - "pip install -r requirements.txt"
     - "pip install coverage"
     - "pip install coveralls"
-script: 
+script:
     - "coverage run --source=iperf3 setup.py test"
 after_success:
     coveralls
