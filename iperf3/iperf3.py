@@ -31,7 +31,7 @@ except ImportError:
     from Queue import Queue  # Python2 compatibility
 
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
