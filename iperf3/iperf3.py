@@ -180,6 +180,10 @@ class IPerf3(object):
         self.lib.iperf_get_test_reverse.argtypes = (c_void_p,)
         self.lib.iperf_set_test_reverse.restype = None
         self.lib.iperf_set_test_reverse.argtypes = (c_void_p, c_int,)
+        self.lib.iperf_get_test_get_server_output.restype = c_int
+        self.lib.iperf_get_test_get_server_output.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_get_server_output.restype = None
+        self.lib.iperf_set_test_get_server_output.argtypes = (c_void_p, c_int,)
         self.lib.iperf_run_client.restype = c_int
         self.lib.iperf_run_client.argtypes = (c_void_p,)
         self.lib.iperf_run_server.restype = c_int
@@ -605,6 +609,21 @@ class Client(IPerf3):
             self.lib.iperf_set_test_reverse(self._test, 0)
 
         self._reverse = enabled
+    
+    @property
+    def get_server_output(self):
+        """The server output."""
+        self._server_output = self.lib.iperf_get_test_get_server_output(self._test)
+        return self._server_output
+
+    @get_server_output.setter
+    def get_server_output(self, enabled):
+        if enabled:
+            self.lib.iperf_set_test_get_server_output(self._test, 1)
+        else:
+            self.lib.iperf_set_test_get_server_output(self._test, 0)
+        
+        self._get_server_output = enabled
 
     def run(self):
         """Run the current test client.
@@ -773,6 +792,10 @@ class TestResult(object):
     :param lost_packets:
     :param lost_percent:
     :param seconds:
+
+    Server information
+
+    :param server_output: The server output (Only returned from client)
     """
 
     def __init__(self, result):
@@ -864,6 +887,10 @@ class TestResult(object):
                 self.lost_packets = self.json['end']['sum']['lost_packets']
                 self.lost_percent = self.json['end']['sum']['lost_percent']
                 self.seconds = self.json['end']['sum']['seconds']
+            
+            # Server information (Only returned from client)
+            self.server_output = self.json.get('server_output_text') or self.json.get('server_output_json')
+            
 
     @property
     def reverse(self):
