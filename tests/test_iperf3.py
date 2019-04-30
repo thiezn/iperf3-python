@@ -150,6 +150,16 @@ class TestPyPerf:
         client = iperf3.Client()
         client.reverse = False
         assert not client.reverse
+    
+    def test_get_server_output_enabled(self):
+        client = iperf3.Client()
+        client.get_server_output = True
+        assert client.get_server_output
+
+    def test_get_server_output__disabled(self):
+        client = iperf3.Client()
+        client.get_server_output = False
+        assert not client.get_server_output
 
     def test_get_last_error(self):
         client = iperf3.Client()
@@ -204,6 +214,66 @@ class TestPyPerf:
 
         # These are added to check some of the TestResult variables
         assert response.reverse
+        assert response.type == 'client'
+        assert response.__repr__()
+    
+    def test_client_succesful_get_server_output(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5203
+        client.duration = 1
+        client.get_server_output = True
+
+        server = subprocess.Popen(["iperf3", "-s", "-p", "5203"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5203
+
+        # These are added to check some of the TestResult variables
+        assert response.server_output
+        assert response.type == 'client'
+        assert response.__repr__()
+    
+    def test_client_succesful_get_server_output_json(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5203
+        client.duration = 1
+        client.get_server_output = True
+
+        server = subprocess.Popen(["iperf3", "-s", "-J", "-p", "5203"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5203
+
+        # These are added to check some of the TestResult variables
+        assert response.server_output
+        assert response.type == 'client'
+        assert response.__repr__()
+    
+    def test_client_unsuccesful_get_server_output(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5203
+        client.duration = 1
+        client.get_server_output = False
+
+        server = subprocess.Popen(["iperf3", "-s", "-p", "5203"])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5203
+
+        # These are added to check some of the TestResult variables
+        assert not response.server_output
         assert response.type == 'client'
         assert response.__repr__()
 
