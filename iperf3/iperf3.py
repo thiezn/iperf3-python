@@ -632,6 +632,10 @@ class Client(IPerf3):
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
 
             return TestResult(data)
+        else:
+            self.lib.iperf_run_client(self._test)
+
+            return None
 
 
 class Server(IPerf3):
