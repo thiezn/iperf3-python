@@ -778,20 +778,13 @@ class Server(IPerf3):
 
         :rtype: instance of :class:`TestResult`
         """
-        def append(s):
-            with open("test.txt", "a") as myfile:
-                myfile.write(s + "\n")
-
         def _run_in_thread(self, data_queue):
             """Runs the iperf_run_server
 
             :param data_queue: thread-safe queue
             """
-            append("xx")
             output_to_pipe(self._pipe_in)  # disable stdout
-            append("yy %d" % self._port)
             error = self.lib.iperf_run_server(self._test)
-            append("zz")
             output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
 
             # TODO json_output_string not available on earlier iperf3 builds
@@ -807,7 +800,6 @@ class Server(IPerf3):
 
             self.lib.iperf_reset_test(self._test)
             data_queue.put(data)
-
 
         if self.json_output:
             data_queue = Queue()
@@ -906,7 +898,7 @@ class TestResult(object):
         # The full result data
         self.text = result
 
-        # When using authentication iperf3 does a funny things
+        # When using authentication iperf3 does a funny thing
         # and prints out the following before the JSON response:
         #   Authentication successed for user 'test' ts 1598806741
         # So we just skip past it to the first '{'
