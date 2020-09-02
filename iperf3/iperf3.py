@@ -350,7 +350,6 @@ class IPerf3(object):
     @json_output.setter
     def json_output(self, enabled):
         if enabled:
-            print("enabling")
             self.lib.iperf_set_test_json_output(self._test, 1)
         else:
             self.lib.iperf_set_test_json_output(self._test, 0)
