@@ -639,7 +639,6 @@ class Client(IPerf3):
 
     @username.setter
     def username(self, username):
-        print("calling it")
         self.lib.iperf_set_test_client_username(
             self._test,
             c_char_p(username.encode('utf-8'))
@@ -653,7 +652,6 @@ class Client(IPerf3):
 
     @password.setter
     def password(self, password):
-        print("calling it2")
         self.lib.iperf_set_test_client_password(
             self._test,
             c_char_p(password.encode('utf-8'))

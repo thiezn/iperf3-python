@@ -27,7 +27,9 @@ openssl rsa -in private_not_protected.pem -outform PEM -pubout -out public.pem
 # Create the "authorized_users.txt" file
 # Format is
 # username,sha256hash("{username},password")
-USER="test"
-PASSWD="test"
-SHA256_USER_PASSWD=`echo -n {$USER}$PASSWD | openssl dgst -sha256`
-echo "$USER,$SHA256_USER_PASSWD" > authorized_users.txt
+AUTHORIZED_USERS_FILE="authorized_users.txt"
+
+# Create user with test, test username, password.
+rm $AUTHORIZED_USERS_FILE
+./add_user.sh test test $AUTHORIZED_USERS_FILE
+
