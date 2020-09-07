@@ -692,6 +692,7 @@ class Client(IPerf3):
             output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
 
+            data = None
             # Only some versions >= 3.1 support json_output_string
             # Also some version of iperf have a bug where the json_output_string
             # is empty. In those cases try the old way if data is still empty.
