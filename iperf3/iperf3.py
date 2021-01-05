@@ -82,8 +82,22 @@ def output_to_screen(stdout_fd, stderr_fd):
     # os.dup2(stderr_fd, 2)
 
 def get_iperf_version(version_string):
-    match = re.match(r"iperf ([0-9])\.([0-9]).([0-9])", version_string)
-    return (int(match[1]), int(match[2]), int(match[3])) if match else (2, 0, 0)
+    match = re.match(r"iperf ([0-9])\.([0-9]).?([0-9])?", version_string)
+    major = 3
+    minor = 0
+    mini = 0
+
+    # groups includes the whole string, too.
+    matchCount = len(match.groups()) - 1
+
+    if matchCount > 1:
+        major = int(match[1])
+        minor = int(match[2])
+
+    if matchCount > 2:
+        mini = int(match[3])
+
+    return (major, minor, mini)
 
 class IPerf3(object):
     """The base class used by both the iperf3 :class:`Server` and :class:`Client`
