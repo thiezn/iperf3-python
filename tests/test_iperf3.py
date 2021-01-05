@@ -2,10 +2,36 @@ import os
 import iperf3
 import pytest
 import subprocess
+import base64
+import re
 from time import sleep
 
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+# Return paths files local to this module.
+# Given file, assumed to be in directory as this module, transform it into the full path to find it.
+def get_test_data_file_path(file):
+  dirname = os.path.dirname(os.path.abspath(__file__))
+  x= os.path.join(dirname, file)
+  print(x)
+  return x
+
+# Return the contents of a PEM file Base 64 encoded
+# And yes, if you're wondering the "key" part of the PEM
+# file is already Base64 encoded. Turns out the iperf_api is funky
+# and assumes the file to be "double" encoded.
+def get_key_as_base64(key_file):
+    with open(get_test_data_file_path(key_file), 'rb') as file:
+        raw_key = file.read()
+        return base64.b64encode(raw_key).decode("ascii")
+
+# Return (major, minor, mini) tuple of version from version string
+# like iperf 3.2.1.
+# Return 3.0.0 if the version string is poorly formed.
+def get_iperf_version(version_string):
+    match = re.match(r"iperf ([0-9])\.([0-9]).([0-9])", version_string)
+    return (int(match[1]), int(match[2]), int(match[3])) if match else (3, 0, 0)
 
 class TestPyPerf:
 
@@ -18,7 +44,7 @@ class TestPyPerf:
         assert server._test
 
     def test_lib_name(self):
-        client = iperf3.Client(lib_name='libiperf.so.0')
+        client = iperf3.Client()
         assert client._test
 
     def test_run_not_implemented(self):
@@ -233,10 +259,10 @@ class TestPyPerf:
         server = iperf3.Server()
         server.bind_address = '127.0.0.1'
         server.port = 5201
-
+        print("here")
         server2 = subprocess.Popen(["iperf3", "-s"])
         sleep(.3)  # give the server some time to start
-
+        print("server started")
         response = server.run()
         server2.kill()
 
@@ -256,13 +282,15 @@ class TestPyPerf:
         )
         response = server.run()
 
-        if server.iperf_version.startswith('iperf 3.0') or server.iperf_version.startswith('iperf 3.1'):
+        (major, minor, mini) = get_iperf_version(server.iperf_version)
+        if  major >= 3 and minor >= 0:
             assert not response.error
             assert response.local_host == '127.0.0.1'
             assert response.local_port == 5205
             assert response.type == 'server'
         else:
             assert response.error == 'the client has unexpectedly closed the connection'
+
 
     def test_server_run_output_to_screen(self):
         server = iperf3.Server()
@@ -332,3 +360,71 @@ class TestPyPerf:
         assert isclose(result.received_kB_s, 114046.387, rel_tol=0.01)
         assert isclose(result.received_MB_s, 111.373, rel_tol=0.01)
 
+    def test_client_successful_run_with_auth(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5209
+        client.duration = 1
+        client.username = "test"
+        client.password = "test"
+        client.rsa_pubkey = get_key_as_base64("public.pem")
+
+        server = subprocess.Popen(["iperf3", "-s", "-p", "5209", "--authorized-users-path", get_test_data_file_path("authorized_users.txt"),
+            "--rsa-private-key-path", get_test_data_file_path("private_not_protected.pem")])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        print(response)
+        assert response.remote_host == '127.0.0.1'
+        assert response.remote_port == 5209
+
+        # These are added to check some of the TestResult variables
+        assert not response.reverse
+        assert response.type == 'client'
+        assert response.__repr__()
+
+    def test_client_failed_run_with_auth(self):
+        client = iperf3.Client()
+        client.server_hostname = '127.0.0.1'
+        client.port = 5210
+        client.duration = 1
+        client.username = "test"
+        client.password = "wrongpassword"
+        client.rsa_pubkey = get_key_as_base64("public.pem")
+
+        server = subprocess.Popen(["iperf3", "-s", "-p", "5210", "--authorized-users-path", get_test_data_file_path("authorized_users.txt"),
+            "--rsa-private-key-path", get_test_data_file_path("private_not_protected.pem")])
+        sleep(.3)  # give the server some time to start
+        response = client.run()
+        server.kill()
+
+        assert "test authorization failed" in response.error
+
+    def test_server_run_with_auth(self):
+        server = iperf3.Server()
+        server.bind_address = '127.0.0.1'
+        server.port = 5211
+        # Use authorized_users.txt, public.pem, private.pem and
+        # username/password of test/test for client / server auth
+        server.authorized_users = get_test_data_file_path("authorized_users.txt")
+        server.rsa_privkey = get_key_as_base64("private_not_protected.pem")
+
+        # Launching the client with a sleep timer to give our server some time to start
+        client = subprocess.Popen(
+            'sleep .3 && iperf3 -c 127.0.0.1 -p 5211 -t 1 --rsa-public-key-path ' + get_test_data_file_path("public.pem") + ' --username test',
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env={'IPERF3_PASSWORD': 'test'}
+        )
+        response = server.run()
+
+        (major, minor, mini) = get_iperf_version(server.iperf_version)
+        if  major >= 3 and minor >= 8:
+            assert not response.error
+            assert response.local_host == '127.0.0.1'
+            assert response.local_port == 5211
+            assert response.type == 'server'
+        else:
+            assert response.error == 'the client has unexpectedly closed the connection'

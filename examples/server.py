@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import iperf3
-
+import iperf3.iperf3
 
 server = iperf3.Server()
 print('Running server: {0}:{1}'.format(server.bind_address, server.port))

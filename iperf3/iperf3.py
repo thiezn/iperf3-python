@@ -23,6 +23,7 @@ import os
 import select
 import json
 import threading
+import re
 from socket import SOCK_DGRAM, SOCK_STREAM
 
 try:
@@ -30,8 +31,8 @@ try:
 except ImportError:
     from Queue import Queue  # Python2 compatibility
 
-
 __version__ = '0.1.11'
+
 
 
 MAX_UDP_BULKSIZE = (65535 - 8 - 20)
@@ -80,6 +81,23 @@ def output_to_screen(stdout_fd, stderr_fd):
     os.dup2(stdout_fd, 1)
     # os.dup2(stderr_fd, 2)
 
+def get_iperf_version(version_string):
+    match = re.match(r"iperf ([0-9])\.([0-9]).?([0-9])?", version_string)
+    major = 3
+    minor = 0
+    mini = 0
+
+    # groups includes the whole string, too.
+    matchCount = len(match.groups()) - 1
+
+    if matchCount > 1:
+        major = int(match[1])
+        minor = int(match[2])
+
+    if matchCount > 2:
+        mini = int(match[3])
+
+    return (major, minor, mini)
 
 class IPerf3(object):
     """The base class used by both the iperf3 :class:`Server` and :class:`Client`
@@ -191,6 +209,24 @@ class IPerf3(object):
             # Only available from iperf v3.1 and onwards
             self.lib.iperf_get_test_json_output_string.restype = c_char_p
             self.lib.iperf_get_test_json_output_string.argtypes = (c_void_p,)
+            self.lib.iperf_set_test_get_server_output.argtypes = (c_void_p, c_int,)
+            self.lib.iperf_get_test_get_server_output.restype = c_char_p
+            self.lib.iperf_get_test_get_server_output.argtypes = (c_void_p,)
+        except AttributeError:
+            pass
+
+        try:
+            # Only available from iperf v3.8 and onwards
+            self.lib.iperf_set_test_client_username.restype = None
+            self.lib.iperf_set_test_client_username.argtypes = (c_void_p, c_char_p)
+            self.lib.iperf_set_test_client_password.restype = None
+            self.lib.iperf_set_test_client_password.argtypes = (c_void_p, c_char_p)
+            self.lib.iperf_set_test_client_rsa_pubkey.restype = None
+            self.lib.iperf_set_test_client_rsa_pubkey.argtypes = (c_void_p, c_char_p)
+            self.lib.iperf_set_test_server_authorized_users.restype = None
+            self.lib.iperf_set_test_server_authorized_users.argtypes = (c_void_p, c_char_p)
+            self.lib.iperf_set_test_server_rsa_privkey.restype = None
+            self.lib.iperf_set_test_server_rsa_privkey.argtypes = (c_void_p, c_char_p)
         except AttributeError:
             pass
 
@@ -427,6 +463,10 @@ class Client(IPerf3):
         self._duration = None
         self._bandwidth = None
         self._protocol = None
+        self._username = None
+        self._password = None
+        self._rsa_pubkey = None
+        self._server_output = False
 
     @property
     def server_hostname(self):
@@ -606,6 +646,57 @@ class Client(IPerf3):
 
         self._reverse = enabled
 
+    @property
+    def username(self):
+        """Username for authenticated iperf."""
+        return self._username
+
+    @username.setter
+    def username(self, username):
+        self.lib.iperf_set_test_client_username(
+            self._test,
+            c_char_p(username.encode('utf-8'))
+        )
+        self._username = username
+
+    @property
+    def password(self):
+        """Password for authenticated iperf."""
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        self.lib.iperf_set_test_client_password(
+            self._test,
+            c_char_p(password.encode('utf-8'))
+        )
+        self._password = password
+
+    @property
+    def rsa_pubkey(self):
+        """RSA pubkey to use for encrypting authentication information."""
+        return self._rsa_pubkey
+
+    @rsa_pubkey.setter
+    def rsa_pubkey(self, rsa_pubkey):
+        self.lib.iperf_set_test_client_rsa_pubkey(
+            self._test,
+            c_char_p(rsa_pubkey.encode('ascii'))
+        )
+        self._rsa_pubkey = rsa_pubkey
+
+
+    @property
+    def server_output(self):
+        """Server output."""
+        self._server_output = True if self.lib.iperf_get_test_get_server_output(self._test) else False
+        return self._server_output
+
+    @server_output.setter
+    def server_output(self, server_output):
+        self.lib.iperf_set_test_get_server_output(self._test, c_int(1 if server_output else 0))
+        self._server_output = server_output
+
     def run(self):
         """Run the current test client.
 
@@ -615,19 +706,24 @@ class Client(IPerf3):
             output_to_pipe(self._pipe_in)  # Disable stdout
             error = self.lib.iperf_run_client(self._test)
 
-            if not self.iperf_version.startswith('iperf 3.1'):
-                data = read_pipe(self._pipe_out)
-                if data.startswith('Control connection'):
-                    data = '{' + data.split('{', 1)[1]
-            else:
+            data = None
+            # Only some versions >= 3.1 support json_output_string
+            # Also some version of iperf have a bug where the json_output_string
+            # is empty. In those cases try the old way if data is still empty.
+            (major, minor, mini) = get_iperf_version(self.iperf_version)
+            if major >= 3 and minor >= 1:
                 data = c_char_p(
                     self.lib.iperf_get_test_json_output_string(self._test)
                 ).value
                 if data:
                     data = data.decode('utf-8')
 
-            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
+            if not data:
+                data = read_pipe(self._pipe_out)
+                if data.startswith('Control connection'):
+                    data = '{' + data.split('{', 1)[1]
 
+            output_to_screen(self._stdout_fd, self._stderr_fd)  # enable stdout
             if not data or error:
                 data = '{"error": "%s"}' % self._error_to_string(self._errno)
 
@@ -656,13 +752,44 @@ class Server(IPerf3):
     def __init__(self, *args, **kwargs):
         """Initialise the iperf3 server instance"""
         super(Server, self).__init__(role='s', *args, **kwargs)
+        self._authorized_users = None
+        self._rsa_privkey = None
+
+    @property
+    def authorized_users(self):
+        return self._authorized_users
+
+    @authorized_users.setter
+    def authorized_users(self, authorized_users):
+        '''
+            authorized_users: path to file containing the authorized_users in the format described.
+        '''
+        self.lib.iperf_set_test_server_authorized_users(
+            self._test,
+            c_char_p(authorized_users.encode('utf-8'))
+        )
+        self._authorized_users = authorized_users
+
+    @property
+    def rsa_privkey(self):
+        return self._rsa_privkey
+
+    @rsa_privkey.setter
+    def rsa_privkey(self, rsa_privkey):
+        '''
+            rsa_privkey: Base64 encoded string of the _unencrypted_ private key.
+        '''
+        self.lib.iperf_set_test_server_rsa_privkey(
+            self._test,
+            c_char_p(rsa_privkey.encode('ascii'))
+        )
+        self._rsa_privkey = rsa_privkey
 
     def run(self):
         """Run the iperf3 server instance.
 
         :rtype: instance of :class:`TestResult`
         """
-
         def _run_in_thread(self, data_queue):
             """Runs the iperf_run_server
 
@@ -782,7 +909,13 @@ class TestResult(object):
         """
         # The full result data
         self.text = result
-        self.json = json.loads(result)
+
+        # When using authentication iperf3 does a funny thing
+        # and prints out the following before the JSON response:
+        #   Authentication successed for user 'test' ts 1598806741
+        # So we just skip past it to the first '{'
+        authentication_stripped_result = result[result.find('{'):]
+        self.json = json.loads(authentication_stripped_result)
 
         if 'error' in self.json:
             self.error = self.json['error']
@@ -820,6 +953,9 @@ class TestResult(object):
             self.remote_cpu_total = cpu_utilization_perc['remote_total']
             self.remote_cpu_user = cpu_utilization_perc['remote_user']
             self.remote_cpu_system = cpu_utilization_perc['remote_system']
+
+            # FIX check for client
+            self.server_output_text = self.json['server_output_text'] if 'server_output_text' in self.json else ''
 
             # TCP specific test results
             if self.protocol == 'TCP':
