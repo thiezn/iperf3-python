@@ -112,6 +112,11 @@ class IPerf3(object):
             )
 
         # Set the appropriate C types.
+        self.lib.iperf_get_test_get_server_output.restype = c_int
+        self.lib.iperf_get_test_get_server_output.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_get_server_output.restype = None
+        self.lib.iperf_set_test_get_server_output.argtypes = (c_void_p,c_int)
+
         self.lib.iperf_client_end.restype = c_int
         self.lib.iperf_client_end.argtypes = (c_void_p,)
         self.lib.iperf_free_test.restxpe = None
@@ -452,6 +457,30 @@ class Client(IPerf3):
             c_char_p(hostname.encode('utf-8'))
         )
         self._server_hostname = hostname
+
+    @property
+    def server_output(self):
+        """Toggles direction of test
+
+        :rtype: bool
+        """
+        enabled = self.lib.iperf_get_test_get_server_output(self._test)
+
+        if enabled:
+            self._server_output = True
+        else:
+            self._server_output = False
+
+        return self._server_output
+
+    @server_output.setter
+    def server_output(self, enabled:bool):
+        if enabled:
+            self.lib.iperf_set_test_get_server_output(self._test, 1)
+        else:
+            self.lib.iperf_set_test_get_server_output(self._test, 0)
+
+        self._server_output = enabled
 
     @property
     def protocol(self):
