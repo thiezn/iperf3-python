@@ -191,6 +191,8 @@ class IPerf3(object):
             # Only available from iperf v3.1 and onwards
             self.lib.iperf_get_test_json_output_string.restype = c_char_p
             self.lib.iperf_get_test_json_output_string.argtypes = (c_void_p,)
+            self.lib.iperf_set_test_get_server_output.restype = c_char_p
+            self.lib.iperf_set_test_get_server_output.argtypes = (c_void_p,)
         except AttributeError:
             pass
 
@@ -581,6 +583,30 @@ class Client(IPerf3):
         else:
             self.lib.iperf_set_test_zerocopy(self._test, 0)
             self._zerocopy = False
+
+    @property
+    def serveroutput(self):
+        """Toggle server result
+
+        :rtype: bool
+        """
+        enabled = self.lib.iperf_get_test_get_server_output(self._test)
+
+        if enabled:
+            self._serveroutput = True
+        else:
+            self._serveroutput = False
+
+        return self._serveroutput
+
+    @serveroutput.setter
+    def serveroutput(self, enabled):
+        if enabled:
+            self.lib.iperf_set_test_get_server_output(self._test, 1)
+        else:
+            self.lib.iperf_set_test_get_server_output(self._test, 0)
+
+        self._serveroutput = enabled
 
     @property
     def reverse(self):
