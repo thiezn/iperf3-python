@@ -23,6 +23,7 @@ import select
 import json
 import threading
 from socket import SOCK_DGRAM, SOCK_STREAM
+from typing import Optional
 from dacite.core import from_dict
 from iperf3.iperf3_interfaces import IperfResult
 
@@ -672,10 +673,15 @@ class Client(IPerf3):
         result = self.run()
         return TestResult(result)
 
-    def run_json(self) -> IperfResult:
+    def run_json(self) -> Optional[IperfResult]:
         result = self.run()
         self.json = json.loads(result)
-        return from_dict(data_class=IperfResult, data=self.json)
+        try:
+            data = from_dict(data_class=IperfResult, data=self.json)
+            return data
+        except KeyError as ke:
+            print(f"Warning: {ke}. Returning None")
+            return None
 
 
 class Server(IPerf3):
@@ -752,10 +758,15 @@ class Server(IPerf3):
         result = self.run()
         return TestResult(result)
 
-    def run_json(self) -> IperfResult:
+    def run_json(self) -> Optional[IperfResult]:
         result = self.run()
         self.json = json.loads(result)
-        return from_dict(data_class=IperfResult, data=self.json)
+        try:
+            data = from_dict(data_class=IperfResult, data=self.json)
+            return data
+        except KeyError as ke:
+            print(f"Warning: {ke}. Returning None")
+            return None
 
 
 class TestResult:
