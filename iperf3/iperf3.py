@@ -24,7 +24,9 @@ import json
 import threading
 from socket import SOCK_DGRAM, SOCK_STREAM
 from typing import Optional
+import warnings
 from dacite.core import from_dict
+from dacite.exceptions import MissingValueError
 from iperf3.iperf3_interfaces import IperfResult
 
 try:
@@ -679,8 +681,8 @@ class Client(IPerf3):
         try:
             data = from_dict(data_class=IperfResult, data=self.json)
             return data
-        except:
-            print(f"Warning - Returning None")
+        except MissingValueError as e:
+            warnings.warn(f"{e}. Returning result as 'None'")
             return None
 
 
@@ -764,8 +766,8 @@ class Server(IPerf3):
         try:
             data = from_dict(data_class=IperfResult, data=self.json)
             return data
-        except:
-            print(f"Warning - Returning None")
+        except MissingValueError as e:
+            warnings.warn(f"{e}. Returning result as 'None'")
             return None
 
 
