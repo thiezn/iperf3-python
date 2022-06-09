@@ -679,8 +679,8 @@ class Client(IPerf3):
         try:
             data = from_dict(data_class=IperfResult, data=self.json)
             return data
-        except KeyError as ke:
-            print(f"Warning: {ke}. Returning None")
+        except:
+            print(f"Warning - Returning None")
             return None
 
 
@@ -764,8 +764,8 @@ class Server(IPerf3):
         try:
             data = from_dict(data_class=IperfResult, data=self.json)
             return data
-        except KeyError as ke:
-            print(f"Warning: {ke}. Returning None")
+        except:
+            print(f"Warning - Returning None")
             return None
 
 
