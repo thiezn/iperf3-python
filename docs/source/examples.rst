@@ -27,7 +27,7 @@ available options for a :class:`Client <iperf3.Client>`
 >>> client.zerocopy = True
 >>> client.verbose = False
 >>> client.reverse = True
->>> client.run()
+>>> client.run_deprecated()
 {'start': {'test_start': {...
 
 **Example 2**
@@ -42,7 +42,7 @@ instance.
 >>> client.server_hostname = '10.10.10.10'
 >>> client.port = 6969
 >>> client.json_output = False
->>> result = client.run()
+>>> result = client.run_deprecated()
 Time: Mon, 15 May 2017 18:20:01 GMT
 Connecting to host 10.10.10.10, port 6969
 [  8] local 127.0.0.1 port 35670 connected to 127.0.0.1 port 5201
@@ -52,6 +52,27 @@ Starting Test: protocol: TCP, 1 streams, 131072 byte blocks, omitting 0 seconds,
 
 >>> result
 None
+
+**Example 3**
+
+This examples sets up connection and returns a :class:`IperfResult <iperf3_interfaces.IperfResult>`
+
+>>> from iperf3.iperf3 import Client
+
+>>> client = Client()
+>>> client.duration = 1
+>>> client.server_hostname = "127.0.0.1"
+>>> client.port = 5201
+>>>
+>>> print(f"Connecting to {client.server_hostname}:{client.port}")
+>>> result = client.run_json()
+>>>
+>>> if result is None:
+>>>     print("No result")
+>>> else:
+>>>     print(result)
+
+IperfResult(start=Start(connected=[Connected(socke ...
 
 **Example 3**
 
@@ -67,7 +88,7 @@ Server
 **Example 1**
 
 This example runs an iperf3 server on 10.10.10.10:6969 and prints out the test results.
-After each test ``server.run()`` finishes and produces the test results. This example
+After each test ``server.run_deprecated()`` finishes and produces the test results. This example
 shows all currently available options for a :class:`Server <iperf3.Server>`
 
 >>> import iperf3
@@ -77,6 +98,24 @@ shows all currently available options for a :class:`Server <iperf3.Server>`
 >>> server.port = 6969
 >>> server.verbose = False
 >>> while True:
-...     server.run()
+...     server.run_deprecated()
 ...
 {'start': {'test_start': {...
+
+**Example 2**
+
+This examples sets up connection and returns a :class:`IperfResult <iperf3_interfaces.IperfResult>`
+
+>>> from iperf3.iperf3 import Server
+
+>>> server = Server()
+>>> print(f"Running server: {server.bind_address}:{server.port}")
+>>>
+>>> while True:
+>>>     result = server.run_json()
+>>>
+>>>     if result is None:
+>>>         print("No result")
+>>>
+>>>     else:
+>>>         print(result)
