@@ -1,1 +1,1 @@
-from .iperf3 import Client, Server, TestResult, IPerf3
+from .iperf3 import Client, Server, IPerf3, IperfResult

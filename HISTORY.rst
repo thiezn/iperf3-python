@@ -3,6 +3,11 @@
 Release History
 ---------------
 
+0.1.12 (2022-06-09)
+++++++++++++++++++
+- Removed TestResult return type
+- Added iperf3_interfaces for run() return types for type safety
+
 0.1.11 (2019-04-13)
 ++++++++++++++++++
 - Fixed kB_s and MB_s in UDP test results (Thanks @gleichda)

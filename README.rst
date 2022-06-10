@@ -20,11 +20,11 @@ Installation
 ------------
 
 First you have to make sure the iperf3 utility is present on your system as the
-python module wraps around the libiperf API provided by it. 
+python module wraps around the libiperf API provided by it.
 
 The common linux distributions offer installations from their own repositories. These
 might be out of date so installation from the official `iperf3 website <http://software.es.net/iperf/>`__
-is preferred. 
+is preferred.
 
 **note** The libiperf API was only introduced in 3.0.6 so make sure you have an updated version
 of iperf3 installation.

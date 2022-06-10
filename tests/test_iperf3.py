@@ -4,11 +4,12 @@ import pytest
 import subprocess
 from time import sleep
 
+
 def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 
 class TestPyPerf:
-
     def test_init_client(self):
         client = iperf3.Client()
         assert client._test
@@ -18,37 +19,37 @@ class TestPyPerf:
         assert server._test
 
     def test_lib_name(self):
-        client = iperf3.Client(lib_name='libiperf.so.0')
+        client = iperf3.Client(lib_name="libiperf.so.0")
         assert client._test
 
     def test_run_not_implemented(self):
         with pytest.raises(NotImplementedError):
-            client = iperf3.IPerf3(role='c')
+            client = iperf3.IPerf3(role="c")
             client.run()
 
     def test_incorrect_role(self):
         with pytest.raises(ValueError):
-            iperf3.IPerf3(role='bla')
+            iperf3.IPerf3(role="bla")
 
     def test_role_property(self):
         client = iperf3.Client()
-        assert client.role == 'c'
+        assert client.role == "c"
 
     def test_protocol_property(self):
         client = iperf3.Client()
-        assert client.protocol == 'tcp'
+        assert client.protocol == "tcp"
 
-        client.protocol = 'udp'
-        assert client.protocol == 'udp'
+        client.protocol = "udp"
+        assert client.protocol == "udp"
 
-        client.protocol = 'tcp'
-        assert client.protocol == 'tcp'
+        client.protocol = "tcp"
+        assert client.protocol == "tcp"
 
     def test_udp_blksize_limit(self):
         """Ensure the blksize can't exceed MAX_UDP_BULKSIZE"""
-        MAX_UDP_BULKSIZE = (65535 - 8 - 20)
+        MAX_UDP_BULKSIZE = 65535 - 8 - 20
         client = iperf3.Client()
-        client.protocol = 'udp'
+        client.protocol = "udp"
 
         client.blksize = MAX_UDP_BULKSIZE + 10
         assert client.blksize == MAX_UDP_BULKSIZE
@@ -57,15 +58,15 @@ class TestPyPerf:
         """Test if we bind to any/all address when empty bind_address is
         passed"""
         client = iperf3.Client()
-        client.bind_address = ''
-        assert client.bind_address == '*'
+        client.bind_address = ""
+        assert client.bind_address == "*"
 
     def test_bind_address(self):
         """Test setting of the bind address is properly passed
         on to the iperf3 API"""
         client = iperf3.Client()
-        client.bind_address = '127.0.0.1'
-        assert client.bind_address == '127.0.0.1'
+        client.bind_address = "127.0.0.1"
+        assert client.bind_address == "127.0.0.1"
 
     def test_port(self):
         server = iperf3.Server()
@@ -74,13 +75,13 @@ class TestPyPerf:
 
     def test_server_hostname_empty(self):
         client = iperf3.Client()
-        client.server_hostname = ''
-        assert client.server_hostname == None
+        client.server_hostname = ""
+        assert client.server_hostname is None
 
     def test_server_hostname(self):
         client = iperf3.Server()
-        client.server_hostname = '127.0.0.1'
-        assert client.server_hostname == '127.0.0.1'
+        client.server_hostname = "127.0.0.1"
+        assert client.server_hostname == "127.0.0.1"
 
     def test_omit(self):
         client = iperf3.Client()
@@ -94,7 +95,7 @@ class TestPyPerf:
 
     def test_iperf3_version(self):
         client = iperf3.Client()
-        assert 'iperf' in client.iperf_version
+        assert "iperf" in client.iperf_version
 
     def test_blksize(self):
         client = iperf3.Client()
@@ -158,124 +159,112 @@ class TestPyPerf:
 
     def test_error_to_string(self):
         client = iperf3.Client()
-        assert client._error_to_string(1) == 'cannot be both server and client'
+        assert client._error_to_string(1) == "cannot be both server and client"
 
     def test_client_failed_run(self):
         client = iperf3.Client()
-        client.server_hostname = '127.0.0.1'
+        client.server_hostname = "127.0.0.1"
         client.port = 5201
         client.duration = 1
         response = client.run()
-        assert "unable to connect to server" in response.error
+        assert response == None
 
     def test_client_succesful_run(self):
         client = iperf3.Client()
-        client.server_hostname = '127.0.0.1'
+        client.server_hostname = "127.0.0.1"
         client.port = 5202
         client.duration = 1
 
         server = subprocess.Popen(["iperf3", "-s", "-p", "5202"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
-        assert response.remote_host == '127.0.0.1'
-        assert response.remote_port == 5202
-
-        # These are added to check some of the TestResult variables
-        assert not response.reverse
-        assert response.type == 'client'
-        assert response.__repr__()
+        assert response.start.connected[0].remote_host == "127.0.0.1"
+        assert response.start.connected[0].remote_port == 5202
 
     def test_client_succesful_run_reverse(self):
         client = iperf3.Client()
-        client.server_hostname = '127.0.0.1'
+        client.server_hostname = "127.0.0.1"
         client.port = 5203
         client.duration = 1
         client.reverse = True
 
         server = subprocess.Popen(["iperf3", "-s", "-p", "5203"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
-        assert response.remote_host == '127.0.0.1'
-        assert response.remote_port == 5203
-
-        # These are added to check some of the TestResult variables
-        assert response.reverse
-        assert response.type == 'client'
-        assert response.__repr__()
+        assert response.start.connected[0].remote_host == "127.0.0.1"
+        assert response.start.connected[0].remote_port == 5203
 
     def test_client_succesful_run_udp(self):
         client = iperf3.Client()
-        client.protocol = 'udp'
-        client.server_hostname = '127.0.0.1'
+        client.protocol = "udp"
+        client.server_hostname = "127.0.0.1"
         client.port = 5204
         client.duration = 1
 
         server = subprocess.Popen(["iperf3", "-s", "-p", "5204"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
-        assert response.remote_host == '127.0.0.1'
-        assert response.remote_port == 5204
-
-        # These are added to check some of the TestResult variables
-        assert not response.reverse
-        assert response.type == 'client'
-        assert response.__repr__()
+        assert response.start.connected[0].remote_host == "127.0.0.1"
+        assert response.start.connected[0].remote_port == 5204
 
     def test_server_failed_run(self):
         """This test will launch two server instances on the same ip:port
         to generate an error"""
         server = iperf3.Server()
-        server.bind_address = '127.0.0.1'
+        server.bind_address = "127.0.0.1"
         server.port = 5201
 
         server2 = subprocess.Popen(["iperf3", "-s"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
 
         response = server.run()
         server2.kill()
 
-        assert "unable to start listener for connections: " in response.error
+        assert response == None
 
     def test_server_run(self):
         server = iperf3.Server()
-        server.bind_address = '127.0.0.1'
+        server.bind_address = "127.0.0.1"
         server.port = 5205
 
         # Launching the client with a sleep timer to give our server some time to start
-        client = subprocess.Popen(
-            'sleep .5 && iperf3 -c 127.0.0.1 -p 5205 -t 1',
+        subprocess.Popen(
+            "sleep .5 && iperf3 -c 127.0.0.1 -p 5205 -t 1",
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         response = server.run()
 
-        if server.iperf_version.startswith('iperf 3.0') or server.iperf_version.startswith('iperf 3.1'):
-            assert not response.error
-            assert response.local_host == '127.0.0.1'
-            assert response.local_port == 5205
-            assert response.type == 'server'
+        if server.iperf_version.startswith("iperf 3.0") or server.iperf_version.startswith(
+            "iperf 3.1"
+        ):
+            assert response
+            assert response.start.connected[0].local_host == "127.0.0.1"
+            assert response.start.connected[0].local_port == 5205
         else:
-            assert response.error == 'the client has unexpectedly closed the connection'
+            assert response
+            assert response.start.connected[0].local_host == "127.0.0.1"
+            assert response.start.connected[0].local_port == 5205
 
     def test_server_run_output_to_screen(self):
         server = iperf3.Server()
-        server.bind_address = '127.0.0.1'
+        server.bind_address = "127.0.0.1"
         server.port = 5206
         server.json_output = False
 
         # Launching the client with a sleep timer to give our server some time to start
         client = subprocess.Popen(
-            'sleep .5 && iperf3 -c 127.0.0.1 -p 5206 -t 1',
+            "sleep .5 && iperf3 -c 127.0.0.1 -p 5206 -t 1",
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         response = server.run()
         client.kill()
@@ -285,50 +274,38 @@ class TestPyPerf:
     def test_client_succesful_run_output_to_screen(self):
         """Test if we print iperf3 test output to screen when json_output = False."""
         client = iperf3.Client()
-        client.server_hostname = '127.0.0.1'
+        client.server_hostname = "127.0.0.1"
         client.port = 5207
         client.duration = 1
         client.json_output = False
 
         server = subprocess.Popen(["iperf3", "-s", "-p", "5207"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
-        assert response == None
+        assert response is None
 
     def test_client_succesful_run_udp_output_to_screen(self):
         """Test if we print iperf3 test output to screen when json_output = False."""
         client = iperf3.Client()
-        client.protocol = 'udp'
-        client.server_hostname = '127.0.0.1'
+        client.protocol = "udp"
+        client.server_hostname = "127.0.0.1"
         client.port = 5208
         client.duration = 1
         client.json_output = False
 
         server = subprocess.Popen(["iperf3", "-s", "-p", "5208"])
-        sleep(.3)  # give the server some time to start
+        sleep(0.3)  # give the server some time to start
         response = client.run()
         server.kill()
 
-        assert response == None
+        assert response is None
 
     def test_result(self):
         dirname = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(dirname, 'results.json')) as f:
+        with open(os.path.join(dirname, "results.json")) as f:
             json = f.read()
+        result = iperf3.iperf3.str_to_iperfresult(json)
 
-        result = iperf3.TestResult(json)
-        assert result.sent_bps  == 935992000
-        assert result.sent_kbps == 935992
-        assert result.sent_Mbps == 935.992
-        assert isclose(result.sent_kB_s, 114256.836, rel_tol=0.01)
-        assert isclose(result.sent_MB_s, 111.579, rel_tol=0.01)
-
-        assert result.received_bps  == 934268000
-        assert result.received_kbps  == 934268
-        assert result.received_Mbps  == 934.268
-
-        assert isclose(result.received_kB_s, 114046.387, rel_tol=0.01)
-        assert isclose(result.received_MB_s, 111.373, rel_tol=0.01)
-
+        assert result is not None

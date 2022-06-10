@@ -35,13 +35,17 @@ The preferred installation method is through PyPi (aka pip install)
 
 .. code-block:: bash
 
-    pip install iperf3
+    # Using Poetry
+    poetry add git+https://github.com/Greenroom-Robotics/iperf3-python.git
+
+    # Using Pip
+    pip install git+https://github.com/Greenroom-Robotics/iperf3-python.git
 
 If pip is unavailable for any reason you can also manually install from github:
 
 .. code-block:: bash
 
-    git clone https://github.com/thiezn/iperf3-python.git
+    git clone https://github.com/Greenroom-Robotics/iperf3-python
     cd iperf3-python
     python3 setup.py test  # (optional) testing through py.test and/or tox
     python3 setup.py install
