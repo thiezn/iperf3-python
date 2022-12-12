@@ -186,6 +186,14 @@ class IPerf3(object):
         self.lib.iperf_run_server.argtypes = (c_void_p,)
         self.lib.iperf_reset_test.restype = None
         self.lib.iperf_reset_test.argtypes = (c_void_p,)
+        self.lib.iperf_get_test_congestion_control.restype = c_char_p
+        self.lib.iperf_get_test_congestion_control.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_congestion_control.restype = None
+        self.lib.iperf_set_test_congestion_control.argtypes = (c_void_p, c_char_p)
+        self.lib.iperf_get_test_extra_data.restype = c_char_p
+        self.lib.iperf_get_test_extra_data.argtypes = (c_void_p,)
+        self.lib.iperf_set_test_extra_data.restype = None
+        self.lib.iperf_set_test_extra_data.argtypes = (c_void_p, c_char_p)
 
         try:
             # Only available from iperf v3.1 and onwards
@@ -605,6 +613,40 @@ class Client(IPerf3):
             self.lib.iperf_set_test_reverse(self._test, 0)
 
         self._reverse = enabled
+
+    @property
+    def congestion_control(self):
+        """Enables different TCP congestion control algorithms
+
+        :rtype: String
+        """
+        self._congestion_control = self.lib.iperf_get_test_congestion_control(self._test)
+        return self._congestion_control
+
+    @congestion_control.setter
+    def congestion_control(self, cc: str):
+        self.lib.iperf_set_test_congestion_control(
+            self._test,
+            c_char_p(cc.encode('utf-8'))
+        )
+        self._congestion_control = cc
+
+    @property
+    def extra_data(self):
+        """Enables extra-data String field to be included in json output
+
+        :rtype: String
+        """
+        self._extra_data = self.lib.iperf_get_test_extra_data(self._test)
+        return self._extra_data
+
+    @extra_data.setter
+    def extra_data(self, dat: str):
+        self.lib.iperf_set_test_extra_data(
+            self._test,
+            c_char_p(dat.encode('utf-8'))
+        )
+        self._extra_data = dat
 
     def run(self):
         """Run the current test client.

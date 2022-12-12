@@ -6,9 +6,12 @@ client = iperf3.Client()
 client.duration = 1
 client.server_hostname = '127.0.0.1'
 client.port = 5201
+client.congestion_control = "bbr"
+client.extra_data = "test data"
 
 print('Connecting to {0}:{1}'.format(client.server_hostname, client.port))
 result = client.run()
+print(result)
 
 if result.error:
     print(result.error)
